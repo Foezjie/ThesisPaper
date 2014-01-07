@@ -2,8 +2,31 @@
 \label{inleiding}
 Configuratiebeheergereedschappen laten toe op een effici\"ente manier IT infrastructuren op te zetten en onderhouden.
 Daarvoor gebruiken ze een model dat de gewenste toestand van de volledige configuratie beschrijft.
+%TODO: voorbeeld van zo'n configuratie?
 De configuratie bestaat uit een reeks machines, elk met de bestanden, mappen, services,\ldots die ze moeten aanbieden.
-Bij het uitrollen van een dergelijke configuratie kijkt de tool 
+Bij het uitrollen van een dergelijke configuratie inspecteert de tool de huidige toestand van elke machine en vergelijkt ze met de gewenste
+toestand.
+Als er een verschil is maakt de tool de nodige aanpassingen. Indien niet onderneemt de tool geen actie.
+Om de vergelijking uit te voeren moet eerst het model gecompileerd.
+De huidige tools compileren voor elke machine hun deel van het model.
+Dit zorgt ervoor dat bij de vergelijking de tool enkel informatie over die ene machine kan gebruiken.
+Daardoor gebeurt het soms dat er teveel gecorrigeerd wordt en de gewenste toestand nog steeds niet bereikt is.
+%TODO hoe vaak is soms? Wat triggert "soms"?
+De toestand is wel al minder afwijkend van de gewenste situatie.
+Een tool zal nooit aanpassingen maken die zorgen voor een configuratie die verder afwijkt van het model dan voorheen.
+Na een paar iteraties zal dus altijd de gewenste configuratie bereikt worden.
+%Ander woord voor tool? CMS? -> Definieren
+Een grafische voorstelling van dit proces te zien op figuur \ref{fig:correctieAfwijking}.
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/correctieAfwijking.svg}
+    \caption{Grafische voorstelling van de iteratief verkleinende afwijking van de gewenste situatie bij het uitrollen van een model.}
+    \label{fig:correctieAfwijking}
+\end{figure}
+
+Het CMS dat aan DistriNet ontwikkeld wordt, IMP, pakt het probleem op een iets andere manier aan.
+%"Het probleem" is nog niet gedefinieerd.
 
 
 %%% Local Variables: 
