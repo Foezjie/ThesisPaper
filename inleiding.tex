@@ -1,8 +1,9 @@
 \chapter{Inleiding}
 \label{inleiding}
-Configuratiebeheergereedschappen laten toe op een effici\"ente manier IT infrastructuren op te zetten en onderhouden.
+Configuratiebeheergereedschappen (of CMS: Configuration Management Software) laten toe op een effici\"ente manier IT infrastructuren op te zetten en onderhouden.
 Daarvoor gebruiken ze een model dat de gewenste toestand van de volledige configuratie beschrijft.
-De configuratie bestaat uit een reeks machines, elk met de bestanden, mappen, services,\ldots die ze moeten aanbieden.
+De configuratie bestaat uit een reeks machines met gewenste aanwezige resources (bestanden, mappen, services,\ldots) die ze moeten aanbieden.
+%herschrijven
 Een eenvoudige voorbeeldconfiguratie is de LAMP-stack: 
 \begin{itemize}
   \item Linux
@@ -10,19 +11,33 @@ Een eenvoudige voorbeeldconfiguratie is de LAMP-stack:
   \item MySQL database (of MariaDB,MongoDB/\ldots)
   \item PHP (of Perl, Python,\ldots)
 \end{itemize}
+%IMP code al tonen?
 
-Bij het uitrollen van configuratie inspecteert de tool de huidige toestand van elke machine en vergelijkt ze met de gewenste
-toestand.
+Bij het uitrollen van configuratie inspecteert de tool de huidige toestand van elke machine en vergelijkt ze met de gewenste toestand.
 Als er een verschil is maakt de tool de nodige aanpassingen. Indien niet onderneemt de tool geen actie.
 Om de vergelijking uit te voeren moet eerst het model gecompileerd.
 De huidige tools compileren voor elke machine hun deel van het model.
 Dit zorgt ervoor dat bij de vergelijking de tool enkel informatie over die ene machine kan gebruiken.
 Daardoor gebeurt het soms dat er teveel gecorrigeerd wordt en de gewenste toestand nog steeds niet bereikt is.
-%TODO hoe vaak is soms? Wat triggert "soms"?
-De toestand is wel al minder afwijkend van de gewenste situatie.
+We kunnen twee gevallen onderscheiden: modellen met afhankelijkheden tussen resources binnen dezelfde machine en met afhankelijkheden tussen verschillende machines.
+Binnen dezelfde machine kan het fout gaan als de afhankelijkheden niet expliciet vermeld staan in het model. 
+%Grafiek van file <- parent dir?
+Als in het model bijvoorbeeld een bestand vermeld staat en de map waarin het moet staan, is het mogelijk dat de CMS eerst het bestand zal
+proberen te cree\"eren en dan pas de map waarin het moet staan, wat duidelijk voor problemen zorgt.
+Het cree\"eren van het bestand zal een foutmelding geven en enkel de folder zal aangemaakt worden
+Pas in de volgende deployment run zullen zowel het bestand als de map aanwezig zijn.
+%deployment is nog niet gebruikt
+
+Tussen machines onderling is het met de huidige tools nog niet mogelijk om afhankelijkheden tussen resources op verschillende machines te
+specifi\"eren. 
+%Niet volledig juist. Niet tussen verzamelingen resources
+Hetzelfde probleem als hierboven besproken is dus nog steeds van toepassing. 
+Het doel van deze thesis om dit mogelijk te maken in IMP.
+%IMP is mogelijks nog niet vermeld.
+De toestand na een run is wel al minder afwijkend van de gewenste situatie.
+%Run nog niet gedefinieerd?
 Een tool zal nooit aanpassingen maken die zorgen voor een configuratie die verder afwijkt van het model dan voorheen.
 Na een paar iteraties zal dus altijd de gewenste configuratie bereikt worden.
-%Ander woord voor tool? CMS? -> Definieren
 Een grafische voorstelling van dit proces te zien op figuur \ref{fig:correctieAfwijking}.
 
 \begin{figure}[p]
