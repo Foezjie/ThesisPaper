@@ -23,14 +23,12 @@ Daardoor gebeurt het soms dat er teveel gecorrigeerd wordt en de gewenste toesta
 We kunnen twee gevallen onderscheiden: modellen met afhankelijkheden tussen resources binnen dezelfde machine en met afhankelijkheden tussen verschillende machines.
 Binnen dezelfde machine kan het fout gaan als de afhankelijkheden niet expliciet vermeld staan in het model. 
 %Grafiek van file <- parent dir?
-Als in het model bijvoorbeeld een bestand vermeld staat en de map waarin het moet staan, is het mogelijk dat de CMS eerst het bestand zal
-proberen te cree\"eren en dan pas de map waarin het moet staan, wat duidelijk voor problemen zorgt.
+Als in het model bijvoorbeeld een bestand vermeld staat en de map waarin het moet staan, is het mogelijk dat de CMS eerst het bestand zal proberen te cree\"eren en dan pas de map waarin het moet staan, wat duidelijk voor problemen zorgt.
 Het cree\"eren van het bestand zal een foutmelding geven en enkel de folder zal aangemaakt worden.
 Pas in de volgende deployment run zullen zowel het bestand als de map aanwezig zijn.
 %deployment is nog niet gebruikt
 
-Tussen machines onderling is het met de huidige tools nog niet mogelijk om afhankelijkheden tussen verzamelingen resources (bijvoorbeeld een
-webserver) op verschillende machines te specifi\"eren. 
+Tussen machines onderling is het met de huidige tools nog niet mogelijk om afhankelijkheden tussen verzamelingen resources (bijvoorbeeld een webserver) op verschillende machines te specifi\"eren. 
 Hetzelfde probleem als hierboven is dus nog steeds van toepassing. 
 Het doel van deze thesis om dit mogelijk te maken in IMP.
 %IMP is mogelijks nog niet vermeld.
