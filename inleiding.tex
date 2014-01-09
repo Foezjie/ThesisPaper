@@ -8,14 +8,15 @@ Een eenvoudige voorbeeldconfiguratie is de LAMP-stack:
 \begin{itemize}
   \item Linux
   \item Apache webserver
-  \item MySQL database (of MariaDB,MongoDB/\ldots)
+  \item MySQL database (of MariaDB, MongoDB,\ldots)
   \item PHP (of Perl, Python,\ldots)
 \end{itemize}
 %IMP code al tonen?
 
-Bij het uitrollen van configuratie inspecteert de tool de huidige toestand van elke machine en vergelijkt ze met de gewenste toestand.
-Als er een verschil is maakt de tool de nodige aanpassingen. Indien niet onderneemt de tool geen actie.
-Om de vergelijking uit te voeren moet eerst het model gecompileerd.
+% Juiste accolades
+Bij het uitrollen van een configuratie (een "deployment run") inspecteert de tool de huidige toestand van elke machine en vergelijkt ze met de gewenste toestand.
+Als er een verschil is maakt de tool de nodige aanpassingen, indien niet onderneemt de tool geen actie.
+Om de vergelijking uit te voeren moet eerst het model gecompileerd worden.
 De huidige tools compileren voor elke machine hun deel van het model.
 Dit zorgt ervoor dat bij de vergelijking de tool enkel informatie over die ene machine kan gebruiken.
 Daardoor gebeurt het soms dat er teveel gecorrigeerd wordt en de gewenste toestand nog steeds niet bereikt is.
@@ -24,21 +25,20 @@ Binnen dezelfde machine kan het fout gaan als de afhankelijkheden niet expliciet
 %Grafiek van file <- parent dir?
 Als in het model bijvoorbeeld een bestand vermeld staat en de map waarin het moet staan, is het mogelijk dat de CMS eerst het bestand zal
 proberen te cree\"eren en dan pas de map waarin het moet staan, wat duidelijk voor problemen zorgt.
-Het cree\"eren van het bestand zal een foutmelding geven en enkel de folder zal aangemaakt worden
+Het cree\"eren van het bestand zal een foutmelding geven en enkel de folder zal aangemaakt worden.
 Pas in de volgende deployment run zullen zowel het bestand als de map aanwezig zijn.
 %deployment is nog niet gebruikt
 
-Tussen machines onderling is het met de huidige tools nog niet mogelijk om afhankelijkheden tussen resources op verschillende machines te
-specifi\"eren. 
-%Niet volledig juist. Niet tussen verzamelingen resources
-Hetzelfde probleem als hierboven besproken is dus nog steeds van toepassing. 
+Tussen machines onderling is het met de huidige tools nog niet mogelijk om afhankelijkheden tussen verzamelingen resources (bijvoorbeeld een
+webserver) op verschillende machines te specifi\"eren. 
+Hetzelfde probleem als hierboven is dus nog steeds van toepassing. 
 Het doel van deze thesis om dit mogelijk te maken in IMP.
 %IMP is mogelijks nog niet vermeld.
 De toestand na een run is wel al minder afwijkend van de gewenste situatie.
 %Run nog niet gedefinieerd?
 Een tool zal nooit aanpassingen maken die zorgen voor een configuratie die verder afwijkt van het model dan voorheen.
 Na een paar iteraties zal dus altijd de gewenste configuratie bereikt worden.
-Een grafische voorstelling van dit proces te zien op figuur \ref{fig:correctieAfwijking}.
+Een grafische voorstelling van dit proces is te zien op figuur \ref{fig:correctieAfwijking}.
 
 \begin{figure}[p]
     \centering
