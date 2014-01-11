@@ -1,9 +1,10 @@
 \chapter{Inleiding}
 \label{inleiding}
-Configuratiebeheergereedschappen (of CMS: Configuration Management Software) laten toe op een effici\"ente manier IT infrastructuren op te zetten en onderhouden.
-Daarvoor gebruiken ze een model dat de gewenste toestand van de volledige configuratie beschrijft.
-De configuratie bestaat uit een reeks machines met gewenste aanwezige resources (bestanden, mappen, services,\ldots) die ze moeten aanbieden.
-%herschrijven
+Configuratiebeheergereedschappen (of CMS: Configuration Management Software) zoals IMP, Puppet, CFEngine,\ldots laten toe op een effici\"ente manier IT infrastructuren op te zetten en onderhouden.
+%Referenties naar sites van hoofdpaginas van CMSen
+De gebruiker van een dergelijke tool specifi\"eert eerst een model dat de gewenste toestand van de volledige infrastructuur beschrijft.
+Dit model bestaat uit een oplijsting van machines met de gewenste aanwezige resources (bestanden, mappen, services,\ldots) die ze moeten aanbieden.
+%Dit model is zo bij de huidige tools, niet echt bij IMP
 Een eenvoudige voorbeeldconfiguratie is de LAMP-stack: 
 \begin{itemize}
   \item Linux
@@ -23,27 +24,37 @@ Daardoor gebeurt het soms dat er teveel gecorrigeerd wordt en de gewenste toesta
 We kunnen twee gevallen onderscheiden: modellen met afhankelijkheden tussen resources binnen dezelfde machine en met afhankelijkheden tussen verschillende machines.
 Binnen dezelfde machine kan het fout gaan als de afhankelijkheden niet expliciet vermeld staan in het model. 
 %Grafiek van file <- parent dir?
-Als in het model bijvoorbeeld een bestand vermeld staat en de map waarin het moet staan, is het mogelijk dat de CMS eerst het bestand zal proberen te cree\"eren en dan pas de map waarin het moet staan, wat duidelijk voor problemen zorgt.
-Het cree\"eren van het bestand zal een foutmelding geven en enkel de folder zal aangemaakt worden.
+%vm1 = ip::Host(name = "server", os = "fedora-18", ip = "172.16.34.14")
+%dir = std::Directory(host=vm1, path = "/tmp/dir", owner="root", group = "root", mode = 644)
+%file = std::File(host=vm1, path = "/tmp/dir/file", owner="root", group = "root", mode = 644, content = "inhoud", requires = host2file)
+Als in het model bijvoorbeeld een bestand en de map waarin het moet staan vermeld zijn, is het mogelijk dat de CMS eerst het bestand zal
+proberen te cree\"eren en dan pas de map waarin het moet staan, wat zou leiden tot een foutmelding. De map wordt wel correct aangemaakt.
 Pas in de volgende deployment run zullen zowel het bestand als de map aanwezig zijn.
-%deployment is nog niet gebruikt
+Dit probleem kan vermeden worden door in het model de vermelden dat het bestand afhankelijk is van de map.
+Dan zal de CMS weten dat de map eerst moet gemaakt worden en dan pas het bestand.
 
-Tussen machines onderling is het met de huidige tools nog niet mogelijk om afhankelijkheden tussen verzamelingen resources (bijvoorbeeld een webserver) op verschillende machines te specifi\"eren. 
-Hetzelfde probleem als hierboven is dus nog steeds van toepassing. 
-Het doel van deze thesis om dit mogelijk te maken in IMP.
-%IMP is mogelijks nog niet vermeld.
-De toestand na een run is wel al minder afwijkend van de gewenste situatie.
-%Run nog niet gedefinieerd?
+In vergelijking met de beginsituatie is de toestand van de machine na \'e\'en run al minder afwijkend van de gewenste situatie.
 Een tool zal nooit aanpassingen maken die zorgen voor een configuratie die verder afwijkt van het model dan voorheen.
 Na een paar iteraties zal dus altijd de gewenste configuratie bereikt worden.
 Een grafische voorstelling van dit proces is te zien op figuur \ref{fig:correctieAfwijking}.
+%Verwijzen naar een hoofdstuk over convergentie?
 
 \begin{figure}[p]
     \centering
-    \includegraphics[width=0.8\textwidth]{images/correctieAfwijking.svg}
+    \includegraphics[width=0.8\textwidth]{images/correctieAfwijking.pdf}
     \caption{Grafische voorstelling van de iteratief verkleinende afwijking van de gewenste situatie bij het uitrollen van een model.}
     \label{fig:correctieAfwijking}
 \end{figure}
+
+Een voorbeeld van afhankelijkheden tussen verschillende machines is de relatie tussen de webserver en een databaseserver binnen de daarnet
+vermelde LAMP-stack.
+Het is wenselijk dat eerst de database online is en dan pas de webserver.
+Anders is het mogelijk dat de webserver data opvraagt van een database die nog niet beschikbaar is.
+Tussen machines onderling is het met de huidige tools nog niet mogelijk om afhankelijkheden tussen verzamelingen resources (bijvoorbeeld een webserver) op verschillende machines te specifi\"eren. 
+De oplossing die er was voor de configuratie binnen \'e\'en host kan dus niet gebruikt worden.
+%Vermelden dat Puppet met een workaround dit wel ongeveer kan?
+
+Het doel van deze thesis is om in IMP de functionaliteit toe te voegen die het mogelijk maakt afhankelijkheden tussen verzamelingen resources te specifi\"eren.
 
 %TODO: de probleemstelling is nog niet echt gedefinieerd tot nu toe
 
