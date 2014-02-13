@@ -1,7 +1,30 @@
 \chapter{Inleiding}
 \label{inleiding}
-Configuratiebeheergereedschappen (of CMS: Configuration Management Software) zoals IMP, Puppet, CFEngine,\ldots laten toe op een effici\"ente manier IT infrastructuren op te zetten en onderhouden.
-%Referenties naar sites van hoofdpaginas van CMSen
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%          Waarom configuratiemanagement?           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Configuratiebeheergereedschappen zijn ontwikkeld om het leven van systeembeheerders makkelijker te maken.
+Serverinfrastructuren worden steeds uitgebreider en complexer.
+Manueel elke server configureren kost niet alleen teveel tijd maar is ook erg foutgevoelig.
+Het gebruik van scripts is al een stap in de goede richting maar is nog steeds niet voldoende.
+Als bijvoorbeeld ssh gebruikt wordt om een reeks servers up te daten en \'e\'en ervan is niet beschikbaar is er plots een verschil tussen systemen die eigenlijk dezelfde configuratie zouden moeten hebben.\todo{Herschrijven}
+Een andere manier om een verzameling gelijkaardige machines van hun initi\"ele configuratie te voorzien is het gebruik van images.
+Daarbij wordt eerst \'e\'en machine manueel geconfigureerd en daarna de volledige set-up gekloond naar de rest van de servers.
+Deze methode werkt niet meer voor het verdere onderhoud van de configuraties.
+%http://sysadvent.blogspot.be/2011/12/day-19-why-use-configuration-management.html
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%          Overgaan naar de cloud                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Dit probleem komt nog prominenter voor als de infrastructuur niet lokaal maar in de cloud gehost wordt.
+Een groot voordeel van werken in de cloud is de flexibiliteit waarmee servers kunnen toegevoegd en weggenomen kunnen worden.
+Dit proces gebeurt vaak zelfs automatisch waardoor manuele configuratie helemaal geen optie meer is.\todo{source?}
+In een dergelijke omgeving is een tool die uit zichzelf de volledige infrastructuur kan beheren bijna een noodzaak.
+Configuratiebeheergereedschappen (of CMS: Configuration Management Software) zoals IMP, Puppet, CFEngine,\ldots laten toe op een effici\"ente manier IT infrastructuren op te zetten en onderhouden.\todo{Referenties naar sites van hoofdpaginas van CMSen}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%          Werking huidige tools                    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 De gebruiker van een dergelijke tool specifi\"eert eerst een model dat de gewenste toestand van de volledige infrastructuur beschrijft.
 Dit model bestaat uit een oplijsting van machines met de gewenste aanwezige resources (bestanden, mappen, services,\ldots) die ze moeten aanbieden.
 %Dit model is zo bij de huidige tools, niet echt bij IMP
@@ -12,39 +35,66 @@ Een eenvoudige voorbeeldconfiguratie is de LAMP-stack:
   \item MySQL database (of MariaDB, MongoDB,\ldots)
   \item PHP (of Perl, Python,\ldots)
 \end{itemize}
-%IMP code al tonen?
 
-% Juiste accolades
 Bij het uitrollen van een configuratie (een "deployment run") inspecteert de tool de huidige toestand van elke machine en vergelijkt ze met de gewenste toestand.
 Als er een verschil is maakt de tool de nodige aanpassingen, indien niet onderneemt de tool geen actie.
-Om de vergelijking uit te voeren moet eerst het model gecompileerd worden.
-De huidige tools compileren voor elke machine hun deel van het model.
-Dit zorgt ervoor dat bij de vergelijking de tool enkel informatie over die ene machine kan gebruiken.
-Daardoor gebeurt het soms dat er teveel gecorrigeerd wordt en de gewenste toestand nog steeds niet bereikt is.
-We kunnen twee gevallen onderscheiden: modellen met afhankelijkheden tussen resources binnen dezelfde machine en met afhankelijkheden tussen verschillende machines.
-Binnen dezelfde machine kan het fout gaan als de afhankelijkheden niet expliciet vermeld staan in het model. 
-%Grafiek van file <- parent dir?
-%vm1 = ip::Host(name = "server", os = "fedora-18", ip = "172.16.34.14")
-%dir = std::Directory(host=vm1, path = "/tmp/dir", owner="root", group = "root", mode = 644)
-%file = std::File(host=vm1, path = "/tmp/dir/file", owner="root", group = "root", mode = 644, content = "inhoud", requires = host2file)
+De beheerder van de verzameling systemen moet dus na het opstellen van de initi\"ele configuratie zelf geen stappen meer ondernemen om te verzekeren dat de gewenste situatie bereikt wordt.
+Als er later nog aanpassingen moeten gebeuren moet enkel het model aangepast worden en een nieuwe deployment run gestard worden, de systeembeheerder moet niet meer manueel inloggen op elke server.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%          Dependencies gebruiken gaat beter        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Een belangrijk aspect van elk gedistribueerd systeem zijn de afhankelijkheden die bestaan tussen de verschillende delen van dat systeem.
+In het voorbeeld van de LAMP-stack heeft de webserver naast PHP-mogelijkheden ook een werkende database nodig, anders kan deze niet alle functionaliteit aanbieden.
+\missingfigure{Afbeelding met dependencies in LAMP-stack}
+Als deze afhankelijkheden niet gespecifi\"eerd worden in het model kan het configuratietool er ook geen rekening mee houden.
+De tool kan dus het model in een foute volgorde verwerken: eerst de webserver, dan php en uiteindelijk de database.
+De webserver zal bij het opstarten proberen te verbinden met de database, maar deze is nog niet online.
+Een op het eerste zicht succesvolle deployment run kan dus leiden tot een configuratie die niet volledig werkt.
+In vergelijking met de beginsituatie is de toestand van de machine na \'e\'en run al minder afwijkend van de gewenste situatie.
+De tool zal nooit aanpassingen maken die zorgen voor een configuratie die verder afwijkt van het model dan voorheen.
+Na een paar iteraties zal dus altijd de gewenste configuratie bereikt worden.
+\missingfigure{Grafische voortelling van convergentie}
+
+Databases en webserver zijn abstracties die bestaan uit een verzameling objecten.
+Een meer laag niveau voorbeeld is de afhankelijkheid tussen een bestand en de map waarin het staat:
+Als de configuratietool eerst probeert het bestand te cree\"eren en dan pas de map zal de deployment run slechts gedeeltelijk slagen want een bestand kan niet bestaan zonder zijn parent folder.
+\missingfigure{Afbeelding van map-file}
+\todo{Hier al eventual consistency vermelden/verwijzen?}
+
+We kunnen dus concluderen dat het vermelden van dependencies in het model het uitrolprocess significant kan verbeteren, niet alleen in snelheid maar ook in correctheid.
+\todo{snelheid nog niet vermeld. Meerdere deployments onnodig maken.}
+\todo{Belang: correct gebeuren is van groot belang}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%          Dependencies met huidige tools           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+De huidige configuratiebeheergereedschappen laten toe om op het niveau van bestanden, packages en services afhankelijkheden te specifi\"eren.
+Bij het uitrollen van een model wordt dan een volgorde opgelegd waarmee de verschillende objecten verwerkt worden.
+\\
+De tools die momenteel beschikbaar zijn compileren tijdens de deployment voor elke machine hun deel van het model.
+Elke machine krijgt dus informatie over wat hijzelf doet maar kan geen rekening houden met wat er op andere machines gebeurt.
+Afhankelijkheden binnen \'e\'en machine verwerken is dus geen probleem maar afhankelijkheden tussen verschillende machines is niet mogelijk. \todo{Vermelden van workarounds}
+
+De tools die momenteel beschikbaar zijn kunnen dus het hierboven vermelde probleem van een webserver en een database niet oplossen
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%          Dependencies met IMP                     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+IMP (Infrastructure Management Platform) is een nieuwe tool die momenteel nog in ontwikkeling is.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%          Kort: hoe oplossing + resultaten         %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 Als in het model bijvoorbeeld een bestand en de map waarin het moet staan vermeld zijn, is het mogelijk dat de CMS eerst het bestand zal
 proberen te cree\"eren en dan pas de map waarin het moet staan, wat zou leiden tot een foutmelding. De map wordt wel correct aangemaakt.
 Pas in de volgende deployment run zullen zowel het bestand als de map aanwezig zijn.
 Dit probleem kan vermeden worden door in het model de vermelden dat het bestand afhankelijk is van de map.
 Dan zal de CMS weten dat de map eerst moet gemaakt worden en dan pas het bestand.
 
-In vergelijking met de beginsituatie is de toestand van de machine na \'e\'en run al minder afwijkend van de gewenste situatie.
-Een tool zal nooit aanpassingen maken die zorgen voor een configuratie die verder afwijkt van het model dan voorheen.
-Na een paar iteraties zal dus altijd de gewenste configuratie bereikt worden.
-Een grafische voorstelling van dit proces is te zien op figuur \ref{fig:correctieAfwijking}.
-%Verwijzen naar een hoofdstuk over convergentie?
-
-\begin{figure}[p]
-    \centering
-    \includegraphics[width=0.8\textwidth]{images/correctieAfwijking.pdf}
-    \caption{Grafische voorstelling van de iteratief verkleinende afwijking van de gewenste situatie bij het uitrollen van een model.}
-    \label{fig:correctieAfwijking}
-\end{figure}
 
 Een voorbeeld van afhankelijkheden tussen verschillende machines is de relatie tussen de webserver en een databaseserver binnen de daarnet
 vermelde LAMP-stack.
