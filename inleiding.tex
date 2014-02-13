@@ -82,31 +82,18 @@ De tools die momenteel beschikbaar zijn kunnen dus het hierboven vermelde proble
 %          Dependencies met IMP                     %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 IMP (Infrastructure Management Platform) is een nieuwe tool die momenteel nog in ontwikkeling is.
+Een andere aanpak tijdens het deployen van een model laat toe afhankelijkheden tussen hoog-niveau objecten te specifi\"eren.
+In tegenstelling tot de vorige tools krijgt elke machine het volledige model ter beschikking en niet alleen zijn eigen deel.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%          Probleem/doelstelling                    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+De doelstelling van deze thesis is een effici\"ente manier vinden om van die extra informatie gebruik te maken en afhankelijkheden tussen hoog-niveau objecten om te zetten naar afhankelijkheden tussen de laag-niveau resources die zullen gedeployed worden.
+\todo{inkorten}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          Kort: hoe oplossing + resultaten         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-Als in het model bijvoorbeeld een bestand en de map waarin het moet staan vermeld zijn, is het mogelijk dat de CMS eerst het bestand zal
-proberen te cree\"eren en dan pas de map waarin het moet staan, wat zou leiden tot een foutmelding. De map wordt wel correct aangemaakt.
-Pas in de volgende deployment run zullen zowel het bestand als de map aanwezig zijn.
-Dit probleem kan vermeden worden door in het model de vermelden dat het bestand afhankelijk is van de map.
-Dan zal de CMS weten dat de map eerst moet gemaakt worden en dan pas het bestand.
-
-
-Een voorbeeld van afhankelijkheden tussen verschillende machines is de relatie tussen de webserver en een databaseserver binnen de daarnet
-vermelde LAMP-stack.
-Het is wenselijk dat eerst de database online is en dan pas de webserver.
-Anders is het mogelijk dat de webserver data opvraagt van een database die nog niet beschikbaar is.
-Tussen machines onderling is het met de huidige tools nog niet mogelijk om afhankelijkheden tussen verzamelingen resources (bijvoorbeeld een webserver) op verschillende machines te specifi\"eren. 
-De oplossing die er was voor de configuratie binnen \'e\'en host kan dus niet gebruikt worden.
-%Vermelden dat Puppet met een workaround dit wel ongeveer kan?
-
-Het doel van deze thesis is om in IMP de functionaliteit toe te voegen die het mogelijk maakt afhankelijkheden tussen verzamelingen resources te specifi\"eren.
-
-%TODO: de probleemstelling is nog niet echt gedefinieerd tot nu toe
 
 %%% Local Variables: 
 %%% mode: latex
