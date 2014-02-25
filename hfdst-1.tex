@@ -1,47 +1,39 @@
-\chapter{Het eerste hoofdstuk}
-\label{hoofdstuk:1}
-Een hoofdstuk behandelt een samenhangend geheel dat min of meer op zichzelf
-staat. Het is dan ook logisch dat het begint met een inleiding, namelijk
-het gedeelte van de tekst dat je nu aan het lezen bent.
+\chapter{Analyse van het probleem}
+\label{chapter:1}
+In dit deel wordt er dieper ingegaan op de probleemstelling.
+Voor elke soort afhankelijkheid komt er een korte uitleg en daarna \'e\'en of meerdere heuristieken die toepasbaar zijn.
 
-\section{Eerste onderwerp in dit hoofdstuk}
-De inleidende informatie van dit onderwerp.
+\section{Soorten afhankelijkheden}
+\label{section:soorten_afhankelijkheden}
+Zoals in de inleiding duidelijk werd bestaan er verschillende categori\"en van afhankelijkheden.
+Elke categorie verschilt in moeilijkheid en aanpak. 
 
-\subsection{Een item}
-De bijbehorende tekst. Denk eraan om de paragrafen lang genoeg te maken en
-de zinnen niet te lang.
+\subsection{Afhankelijkheden tussen bestanden en mappen}
+\label{subs:bestanden_en_mappen}
+#Hier gaat het over de afhankelijkheid tussen een bestand en de map waarin het staat.
+#Een bestand kan niet bestaan zonder een map dus een heuristiek die elk bestand afhankelijk maakt van zijn parent folder is toepasselijk.
+Tussen bestanden en mappen bestaat er zonder twijfel een sterke afhankelijkheid: een bestand kan helemaal niet bestaan zonder een map.
+De eerste heuristiek die werd gebruikt in IMP is er een die voor elk bestand de "parent folder" opzoekt in het model en een afhankelijkheid toevoegd als deze gevonden wordt.
+Als de map niet vermeld wordt in het model wordt deze ook niet toegevoegd omdat dit ongewenste gevolgen kan hebben. \todo{Welke?}
+\missingfigure{Visuele voorstelling}
 
-Een paragraaf omvat een gedachtengang en bevat dus steeds een paar zinnen.
-Een paragraaf die maar \'e\'en lijn lang is, is dus uit den boze.
+\subsection{Afhankelijkheden bij service stacks}
+\label{subs:service_stacks}
+Net zoals tussen bestanden en mappen is er een sterke afhankelijkheid tussen packages, services en hun eventuele configuratiebestanden:
+een service kan niet gestart worden als zijn package niet ge\"installeerd is en zal niet correct werken zonder een juiste configuratie.
+Een gelijkaardige heuristiek als die van bestanden en mappen kan er dus voor zorgen dat automatisch tussen de correcte afhankelijkheden worden ge\"introduceerd.
+\\
+"Service stack" is een eigen term die ik gegeven heb aan een verzameling van een package en een service (en mogelijks ook een configuratiebestand).
+De verzameling wordt bepaald door te zoeken naar resources die binnen dezelfde scope gedefini\"eerd zijn.
 
-\section{Tweede onderwerp in dit hoofdstuk}
-Er zijn in een hoofdstuk verschillende onderwerpen. We zullen nu
-veronderstellen dat dit het laatste onderwerp is.
+\subsection{Afhankelijkheden door relaties}
+\label{subs:relaties}
+IMP laat toe in het model relaties tussen hoog-niveau objecten te specifi\"eren.
+Sommige relaties, zoals "x [1:] -- [0:] y" impliceren dat y niet kan bestaan zonder een instantie van x.
+Zo bekomen we een heuristiek die de afhankelijkheid tussen x en y toevoegt aan het model.
 
-\subsection{Een item}
-Maak ook geen misbruik van opsommingen. Voor korte opsommingen gebruik je
-geen ``\verb|itemize|'' of ``\texttt{enumerate}'' commando's. Doe dus
-\emph{niet} het volgende:
-\begin{quote}
-  De Eiffeltoren bevat drie verdiepingen:
-  \begin{itemize}
-  \item de eerste;
-  \item de tweede;
-  \item de derde.
-  \end{itemize}
-\end{quote}
-Maar doe:
-\begin{quote}
-  De Eiffeltoren bevat drie verdiepingen: de eerste, de tweede en de derde.
-\end{quote}
+\subsection{Afhankelijkheden tussen machines}
+In dit hoofdstuk wordt verder ingegaan op hoe afhankelijkheden tussen verschillende machines verwerkt worden.
+Het belangrijkste punt is hoe hoog-niveau relaties en afhankelijkheden vertaalt worden naar dependencies op de lagere niveaus.
 
 \section{Besluit van dit hoofdstuk}
-Als je in dit hoofdstuk tot belangrijke resultaten of besluiten gekomen
-bent, dan is het ook logisch om het hoofdstuk af te ronden met een
-overzicht ervan. Voor hoofdstukken zoals de inleiding en het
-literatuuroverzicht is dit niet strikt nodig.
-
-%%% Local Variables: 
-%%% mode: latex
-%%% TeX-master: "masterproef"
-%%% End: 
