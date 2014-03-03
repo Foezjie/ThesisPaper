@@ -1,24 +1,24 @@
 \chapter{Analyse van het probleem}
-\label{chapter:1}
-In dit deel wordt er dieper ingegaan op de probleemstelling.
-Voor elke soort afhankelijkheid komt er een korte uitleg en daarna \'e\'en of meerdere heuristieken die toepasbaar zijn.
+\label{chapter:analyse}
+Door zo veel mogelijk afhankelijkheden uit het model te halen kan een grote \todo{specifi\"eren hoeveel groter} tijdswinst behaalt worden
+tijdens het uitrollen van dat configuratiemodel.
+Als de CMS beschikt over alle bestaande afhankelijkheden kan ze namelijk in \'e\'en keer het volledige model correct uitrollen.
+Het doel is dus om niet alleen de afhankelijkheden te gebruiken die expliciet vermeld staan maar ook heuristieken te gebruiken om
+impliciete afhankelijkheden af te leiden.
 
-\section{Soorten afhankelijkheden}
-\label{section:soorten_afhankelijkheden}
-Zoals in de inleiding duidelijk werd bestaan er verschillende categori\"en van afhankelijkheden.
-Elke categorie verschilt in moeilijkheid en aanpak. 
+De volgende secties zullen uitleg geven over de implementatie en resultaten van de onderzochte heuristieken.
 
 \subsection{Afhankelijkheden tussen bestanden en mappen}
 \label{subs:bestanden_en_mappen}
-#Hier gaat het over de afhankelijkheid tussen een bestand en de map waarin het staat.
-#Een bestand kan niet bestaan zonder een map dus een heuristiek die elk bestand afhankelijk maakt van zijn parent folder is toepasselijk.
+%Hier gaat het over de afhankelijkheid tussen een bestand en de map waarin het staat.
+%Een bestand kan niet bestaan zonder een map dus een heuristiek die elk bestand afhankelijk maakt van zijn parent folder is toepasselijk.
 Tussen bestanden en mappen bestaat er zonder twijfel een sterke afhankelijkheid: een bestand kan helemaal niet bestaan zonder een map.
 De eerste heuristiek die werd gebruikt in IMP is er een die voor elk bestand de "parent folder" opzoekt in het model en een afhankelijkheid toevoegd als deze gevonden wordt.
 Als de map niet vermeld wordt in het model wordt deze ook niet toegevoegd omdat dit ongewenste gevolgen kan hebben. \todo{Welke?}
 \missingfigure{Visuele voorstelling}
 
-\subsection{Afhankelijkheden bij service stacks}
-\label{subs:service_stacks}
+\subsection{Afhankelijkheden tussen services, packages en configuratiebestanden}
+\label{subs:services_packages_en_configuratiebestanden}
 Net zoals tussen bestanden en mappen is er een sterke afhankelijkheid tussen packages, services en hun eventuele configuratiebestanden:
 een service kan niet gestart worden als zijn package niet ge\"installeerd is en zal niet correct werken zonder een juiste configuratie.
 Een gelijkaardige heuristiek als die van bestanden en mappen kan er dus voor zorgen dat automatisch tussen de correcte afhankelijkheden worden ge\"introduceerd.
