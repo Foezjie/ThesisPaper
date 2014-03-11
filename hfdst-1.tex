@@ -1,39 +1,112 @@
 \chapter{Analyse van het probleem}
 \label{chapter:analyse}
-Door zo veel mogelijk afhankelijkheden uit het model te halen kan een grote \todo{specifi\"eren hoeveel groter} tijdswinst behaalt worden
-tijdens het uitrollen van dat configuratiemodel.
+Door zo veel mogelijk afhankelijkheden uit het configuratiemodel te halen kan een grote \todo{specifi\"eren hoeveel groter} tijdswinst behaalt worden tijdens het uitrollen van dat model.
 Als de CMS beschikt over alle bestaande afhankelijkheden kan ze namelijk in \'e\'en keer het volledige model correct uitrollen.
-Het doel is dus om niet alleen de afhankelijkheden te gebruiken die expliciet vermeld staan maar ook heuristieken te gebruiken om
-impliciete afhankelijkheden af te leiden.
+Het doel is dus om niet alleen de afhankelijkheden te gebruiken die expliciet vermeld staan maar ook heuristieken te gebruiken om impliciete afhankelijkheden af te leiden.
 
-De volgende secties zullen uitleg geven over de implementatie en resultaten van de onderzochte heuristieken.
+Deze heuristieken worden toegepast eens het model volledig opgesteld en voordat het uitrollen begint.
+Zo beschikken ze over alle nodige informatie en kan nog extra informatie toegevoegd worden aan het model.
 
-\subsection{Afhankelijkheden tussen bestanden en mappen}
+\section{Afhankelijkheden tussen bestanden en mappen}
 \label{subs:bestanden_en_mappen}
 %Hier gaat het over de afhankelijkheid tussen een bestand en de map waarin het staat.
 %Een bestand kan niet bestaan zonder een map dus een heuristiek die elk bestand afhankelijk maakt van zijn parent folder is toepasselijk.
 Tussen bestanden en mappen bestaat er zonder twijfel een sterke afhankelijkheid: een bestand kan helemaal niet bestaan zonder een map.
+Visueel is dit voorgesteld in figuur \ref{fig:file_dir_dep}.
 De eerste heuristiek die werd gebruikt in IMP is er een die voor elk bestand de "parent folder" opzoekt in het model en een afhankelijkheid toevoegd als deze gevonden wordt.
-Als de map niet vermeld wordt in het model wordt deze ook niet toegevoegd omdat dit ongewenste gevolgen kan hebben. \todo{Welke?}
-\missingfigure{Visuele voorstelling}
+Het algoritme dat hiervoor gebruikt wordt ziet eruit als volgt (pseudocode):
+\begin{lstlisting}
+foreach file in resources:
+    foreach dir in resources:
+        if get_directory(file.path) == dir.path:
+            file.requires.append(dir)
+\end{lstlisting}
 
-\subsection{Afhankelijkheden tussen services, packages en configuratiebestanden}
+Als de map niet vermeld wordt in het model wordt deze ook niet toegevoegd omdat dit ongewenste gevolgen kan hebben. \todo{Welke?}
+
+
+\section{Afhankelijkheden tussen services, packages en configuratiebestanden}
 \label{subs:services_packages_en_configuratiebestanden}
 Net zoals tussen bestanden en mappen is er een sterke afhankelijkheid tussen packages, services en hun eventuele configuratiebestanden:
-een service kan niet gestart worden als zijn package niet ge\"installeerd is en zal niet correct werken zonder een juiste configuratie.
-Een gelijkaardige heuristiek als die van bestanden en mappen kan er dus voor zorgen dat automatisch tussen de correcte afhankelijkheden worden ge\"introduceerd.
-\\
-"Service stack" is een eigen term die ik gegeven heb aan een verzameling van een package en een service (en mogelijks ook een configuratiebestand).
-De verzameling wordt bepaald door te zoeken naar resources die binnen dezelfde scope gedefini\"eerd zijn.
+een service kan niet gestart worden als zijn package niet ge\"installeerd is en zal niet correct werken zonder een aangepast configuratiebestand.
+Een grafische voorstelling hiervan is te vinden op figuur \ref{service_package_dep.pdf}.
+De meest simplistische aanpak om de correcte afhankelijkheden te introduceren is de services afhankelijk maken van alle packages en files.
+Dit introduceert uiteraard veel afhankelijkheden die niet overeenstemmen met de werkelijkheid maar ze maken daardoor het resultaat van het uitrolproces niet fout.
+Een algoritme in pseudocode ziet er uit als volgt:
+\begin{lstlisting}
+foreach service in resources:
+    foreach file in resources:
+        service.requires.append(file)
+    foreach package in resources:
+        service.requires.append(package)
+\end{lstlisting}
 
-\subsection{Afhankelijkheden door relaties}
+De volgende aanpak gebruikt wat meer info uit het model en resulteert in minder overbodige afhankelijkheden.
+In de modelcode worden bestanden, packages en services die bij elkaar horen meestal binnen eenzelfde implementatie gespecifi\"eerd.
+Een voorbeeld is de implementatie van een MySQL server:
+\begin{lstlisting}
+implementation mysql:
+    pkg = std::Package(host= host, name= "mysql-server", state= "installed")
+    svc = std::Service(host= host, name= "mysqld", state= "running", onboot= true)
+
+    config= std::ConfigFile(host= host, path= "/etc/my.cnf", content= template("mysql/my.cnf.tmpl"), requires= pkg, reload= true)
+    conf_dir= std::Directory(host= host, path= "/etc/mysql.conf.d", owner= "root", group= "root", mode= 755)
+
+    dblist= std::ConfigFile(host= host, path= "/etc/sysconfig/mysql", reload= true, content= template("mysql/databases.tmpl"))
+end
+\end{lstlisting}
+
+Bij het verwerken van het model tijdens het uitrolproces bevinden al deze resources zich binnen dezelfde scope.
+De heuristiek bestaat er uiteindelijk uit verzamelingen van packages en services te vinden die binnen \'e\'enzelfde scope gedefini\"eerd zijn en de correcte afhankelijkheden op te stellen tussen enkel die resources.
+Deze verzamlingen worden "service stacks" genoemd.
+De aanwezigheid van files is optioneel: sommige servicen moeten niet verder geconfigureerd worden.
+Algoritmisch ziet de code hiervoor  er uit als volgt (pseudocode):
+
+\begin{lstlisting}
+srv_stacks = []
+for resource in resources:
+    same_scope = [res in resources where res.scope == resources.scope]
+    if same_scope.contains(services) and same_scope.contains(packages):
+        srv_stacks.append(same_scope)
+
+foreach stack in srv_stacks:
+    foreach service in stack:
+        foreach file in stack:
+            service.requires.append(file)
+        foreach package in stack:
+            service.requires.append(package)
+\end{lstlisting}
+
+
+\section{Afhankelijkheden door relaties}
 \label{subs:relaties}
-IMP laat toe in het model relaties tussen hoog-niveau objecten te specifi\"eren.
-Sommige relaties, zoals "x [1:] -- [0:] y" impliceren dat y niet kan bestaan zonder een instantie van x.
-Zo bekomen we een heuristiek die de afhankelijkheid tussen x en y toevoegt aan het model.
+IMP laat toe in het model relaties tussen concepten te specifi\"eren.
+Een voorbeeldrelatie is de volgende:
+\begin{lstlisting}
+BaseClient clients [0:] -- [0:] BaseServer servers
+\end{lstlisting}
+Deze betekent dat een BaseClient nul of meerdere BaseServers nodig heeft, en omgekeerd.
+Een ander voorbeeld is 
+\begin{lstlisting}
+Host host [1] -- [0:] File files
+\end{lstlisting}
+Deze betekent dat op een Host nul of meerdere files kunnen staan, maar dat elke File \'e\'en Host moet hebben.
+Hieruit kunnen we afleiden dat een File niet kan bestaan zonder een host en het dus nodig is dat eerst de Host moet bestaan en opgestart zijn voordat geprobeerd wordt de File te cree\"eren.
 
-\subsection{Afhankelijkheden tussen machines}
-In dit hoofdstuk wordt verder ingegaan op hoe afhankelijkheden tussen verschillende machines verwerkt worden.
-Het belangrijkste punt is hoe hoog-niveau relaties en afhankelijkheden vertaalt worden naar dependencies op de lagere niveaus.
+Algemeen kan men dus besluiten dat elke relatie waar de ene kant een multipliciteit van [0] of [0:] heeft en de andere kant multipliciteit [1] of [1:] de tweede entiteit afhankelijk is van de eerste.
+De code voor deze heuristiek ziet er uit als volgt:
+\begin{lstlisting}
+for resource in resources:
+    model = resource.model
+    if model.hasattr(relation):
+        if model.relation.low == 0 and model.relation.end.low == 1:
+            resource.requires.add(Resource.get_resource(model.relation.end))
+\end{lstlisting}
 
+\section{Afhankelijkheden tussen hoog-niveau concepten}
+IMP laat niet alleen toe om afhankelijkheden tussen enkelvoudige concepten zoals bestanden, services,\ldots te specifi\"eren maar ook tussen samengestelde concepten zoals webservers, databaseservers,\ldots
+Deze relaties zijn moeilijker om te zetten naar expliciete afhankelijkheden omdat de relatie gespecifieerd is tussen de hoog niveau objecten maar niet per se elk onderliggend object in relatie staat met de andere kant.\todo{Herschrijven}
+
+Vaak zijn het enkel de services van de twee concepten die afhankelijk zijn van elkaar, de packages en configuratiebestanden van beide concepten zijn compleet onafhankelijk.
+Deze nieuwe heuristiek zal dus zoeken naar relaties in het model waarin al gespecifi\"eerd is dat een zijde afhankelijk is van de andere en dan tussen de services van beide concepten de bijhorende afhankelijkheid opstellen.
 \section{Besluit van dit hoofdstuk}

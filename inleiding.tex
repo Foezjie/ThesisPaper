@@ -43,7 +43,13 @@ Als er later nog aanpassingen moeten gebeuren moet enkel het model aangepast wor
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Een belangrijk aspect van elk gedistribueerd systeem zijn de afhankelijkheden die bestaan tussen de verschillende delen van dat systeem.
 In het voorbeeld van de LAMP-stack heeft de webserver naast PHP-mogelijkheden ook een werkende database nodig, anders kan deze niet alle functionaliteit aanbieden.
-\missingfigure{Afbeelding met dependencies in LAMP-stack}
+\begin{figure}
+    \label{fig:lamp_dep}
+    \begin{center}
+    \includegraphics[width=0.6\textwidth]{images/lamp_dep.png}
+    \caption{Grafische voorstelling van de afhankelijkheden binnen een LAMP-stack}
+    \end{center}
+\end{figure}
 Als deze afhankelijkheden niet gespecifi\"eerd worden in het model kan de CMS er ook geen rekening mee houden.
 De tool kan dus het model in een foute volgorde verwerken: eerst de webserver, dan php en uiteindelijk de database.
 De webserver zal bij het opstarten proberen te verbinden met de database, maar deze is nog niet online.
@@ -54,17 +60,28 @@ de CMS zal nooit aanpassingen maken die zorgen voor een configuratie die verder 
 Na een paar iteraties zal uiteindelijk altijd de gewenste configuratie bereikt worden.
 Het aantal iteraties is afhankelijk van de hoeveelheid afhankelijkheden die bestaan maar niet aanwezig zijn in het model.
 De kans bestaat wel altijd dat met wat geluk de CMS een willekeurige maar effici\"ente volgorde kiest.
-\missingfigure{Grafische voortelling van convergentie}
+\begin{figure}
+    \label{fig:convergentie}
+    \begin{center}
+    \includegraphics[width=0.6\textwidth]{images/convergentie.png}
+    \caption{Grafische voorstelling van de convergentie na een reeks deployment runs.}
+    \end{center}
+\end{figure}
 
 %CMS laat vaak toe om logisch samenhorende basisobjecten te verzamelen en   
 Databases en webserver zijn abstracties die bestaan uit een verzameling basisobjecten zoals bestanden, packages en services.
 Tussen deze objecten bestaan er natuurlijk ook afhankelijkheden, bijvoorbeel tussen een bestand en de map waarin het staat:
 als de CMS eerst probeert het bestand te cree\"eren en dan pas de map zal de deployment run slechts gedeeltelijk slagen want een bestand kan niet bestaan zonder zijn parent folder.
-\missingfigure{Afbeelding van map-file}
+\begin{figure}
+    \label{fig:file_dir_dep}
+    \begin{center}
+    \includegraphics[width=0.6\textwidth]{images/file_dir_dep.png}
+    \caption{Grafische voorstelling van de afhankelijkheid tussen een bestand en zijn parent folder}
+    \end{center}
+\end{figure}
 \todo{Hier al eventual consistency vermelden/verwijzen?}
 
-We kunnen dus concluderen dat het vermelden van dependencies in het model het uitrolprocess significant kan verbeteren:
-als alle afhankelijkheden vermeld zijn is er maar 1 deployment run nodig.
+We kunnen dus concluderen dat het vermelden van dependencies in het model het uitrolprocess significant kan verbeteren: als alle afhankelijkheden vermeld zijn is er maar 1 deployment run nodig.
 \todo{snelheid nog niet vermeld. Meerdere deployments onnodig maken.}
 \todo{Belang: correct gebeuren is van groot belang}
 
@@ -73,7 +90,7 @@ als alle afhankelijkheden vermeld zijn is er maar 1 deployment run nodig.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 De huidige CMS laten toe om op het niveau van bestanden, packages en services afhankelijkheden te specifi\"eren.
 Bij het uitrollen van een model wordt dan een volgorde opgelegd waarmee de verschillende objecten verwerkt worden.
-\\
+
 De tools die momenteel beschikbaar zijn compileren tijdens de deployment voor elke machine hun deel van het model.
 Elke machine krijgt dus informatie over wat hijzelf doet maar kan geen rekening houden met wat er op andere machines gebeurt.
 Afhankelijkheden binnen \'e\'en machine verwerken is dus geen probleem maar afhankelijkheden tussen verschillende machines zijn niet mogelijk. \todo{Vermelden van workarounds}
@@ -95,8 +112,3 @@ Effici\"ent slaat hier vooral op het vermijden van extra deployment runs door re
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          Kort: hoe oplossing + resultaten         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%% Local Variables: 
-%%% mode: latex
-%%% TeX-master: "masterproef"
-%%% End: 
