@@ -43,9 +43,12 @@
 \usepackage[pdfusetitle,colorlinks,plainpages=false]{hyperref}
 
 \usepackage{todonotes}
+\usepackage{color}
 \usepackage{listings}
+\usepackage{zref-xr}
 
 \lstset{
+        language=python,
         basicstyle=\ttfamily\scriptsize,
         breaklines=true
 }
@@ -77,8 +80,8 @@
 \mainmatter
 
 \include{inleiding}
-\include{hfdst-1} %Analyse van het probleem
-\include{hfdst-2} %Evaluatie
+\include{analyse}
+\include{evaluatie}
 \include{besluit}
 
 % Indien er bijlagen zijn:
