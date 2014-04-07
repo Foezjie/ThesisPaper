@@ -76,8 +76,7 @@ Het aantal iteraties is afhankelijk van de hoeveelheid afhankelijkheden die best
     \end{center}
 \end{figure}
 
-%CMS laat vaak toe om logisch samenhorende basisobjecten te verzamelen en   
-Databases en webserver zijn abstracties die bestaan uit een verzameling basisobjecten zoals bestanden, pakketten en services.
+Databases en webserver zijn abstracties die bestaan uit een verzameling basisobjecten zoals bestanden, pakketten en services.\todo{Beter woord voor abstracties}
 Tussen deze objecten bestaan er natuurlijk ook afhankelijkheden, bijvoorbeel tussen een bestand en de map waarin het staat:
 als de CMS eerst probeert het bestand te cree\"eren en dan pas de map zal de deployment run slechts gedeeltelijk slagen want een bestand kan niet bestaan zonder zijn parent folder.
 \begin{figure}[h]
@@ -96,33 +95,52 @@ We kunnen het onderscheid maken tussen twee situaties: vereisten en afhankelijkh
 In het geval van het bestand en de map is er sprake van een vereiste die niet voldaan is: de map \emph{moet} bestaan v\'o\'or het aanmaken van het bestand of deze wordt niet aangemaakt.
 In het geval van de LAMP-stack houdt de CMS geen rekening met de afhankelijkheid tussen de webserver en de databaseserver.
 Alle resources worden foutloos aangemaakt maar toch werkt de uiteindelijke configuratie niet omdat een foute volgorde werd gehanteerd.
+In beide gevallen is een extra deployment run nodig voordat de configuratie correct werkt.
 
-\todo{Belang: correct gebeuren is van groot belang}
+Als de CMS wel zou rekening houden met de afhankelijkheden en vereisten moet het model slechts \'e\'en keer uitgerold worden.
+Het doel van deze thesis is dan ook om uit te zoeken hoe de software deze extra informatie automatisch uit het model kan afleiden.\todo{Doel pas later vermelden?}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%          Dependencies met huidige tools           %
+%          Afhankelijkheden met huidige tools       %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-De huidige CMS laten toe om op het niveau van bestanden, packages en services afhankelijkheden te specifi\"eren.
-Bij het uitrollen van een model wordt dan een volgorde opgelegd waarmee de verschillende objecten verwerkt worden.
+De huidige CMS laten toe om op het niveau van bestanden, packages en services vereisten en afhankelijkheden te specifi\"eren.
+De specificatie van een vereiste en een afhankelijkheid overlapt zelfs bij deze tools en wordt een ``requirement'' genoemd.
+Bij het uitrollen van een model wordt die informatie gebruikt om een volgorde op te leggen waarmee de verschillende objecten aangemaakt worden.
 
-De tools die momenteel beschikbaar zijn compileren tijdens de deployment voor elke machine hun deel van het model.
-Elke machine krijgt dus informatie over wat hijzelf doet maar kan geen rekening houden met wat er op andere machines gebeurt.
-Afhankelijkheden binnen \'e\'en machine verwerken is dus geen probleem maar afhankelijkheden tussen verschillende machines zijn niet mogelijk. \todo{Vermelden van workarounds}
-De tools die momenteel beschikbaar zijn kunnen dus het hierboven vermelde probleem van een webserver en een database niet oplossen.
+Deze tools compileren tijdens de deployment voor elke machine hun deel van het model.
+Elke machine krijgt dus enkel informatie over wat hij zelf moet doen.
+Afhankelijkheden en vereisten binnen eenzelfde machine verwerken is dan geen probleem maar tussen verschillende machines is dit niet mogelijk.
+Als de LAMP-stack op \'e\'en machine ge\"installeerd wordt kan de gebruiker nog aangeven dat de Apache service afhankelijk is van de databaseservice en PHP.
+Als daarintegen de Apache service op een machine draait en de MySQL-service op een andere kan de gebruiker dit niet meer aangeven.
+De enige optie is dus meerdere deployment runs na elkaar, tot de configuratie volledig correct werkt.
+Voor Puppet bestaat er wel een workaround, zie \cite{puppet-orchestration}.
+\todo{``Orchestration'' CMS zoals Ansible kan dit wel. Verschil opzoeken en uitleggen?}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%          Dependencies met IMP                     %
+%     Afhankelijkheden en vereisten met IMP         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 IMP (Infrastructure Management Platform) is een nieuwe tool die momenteel nog in ontwikkeling is.
-Een andere aanpak tijdens het deployen van een model laat toe afhankelijkheden tussen hoog-niveau objecten te specifi\"eren:
+Ze verschilt op twee vlakken van de andere CMS: gebruik van het model tijdens het uitrolproces en de specificatie van vereisten en afhankelijkheden.%het/het
+
+Ten eerste laat de andere aanpak tijdens het deployen van een model laat toe afhankelijkheden tussen hoog-niveau objecten te specifi\"eren:
 in tegenstelling tot de vorige tools krijgt elke machine het volledige model ter beschikking en niet alleen zijn eigen deel.
-Dit laat de machines toe om rekening te houden met afhankelijkheden tussen eigen objecten en die op een andere machine.
+Machines kunnen zo niet alleen rekening te houden met afhankelijkheden en vereisten tussen eigen concepten maar ook tussen andere machines.
+
+Ten tweede maakt IMP, in tegenstelling tot andere tools, wel het onderscheid tussen vereisten en afhankelijkheden:
+een vereiste is net zoals bij de andere tools en requirement maar afhankelijkheden worden gemodelleerd door middel van relaties tussen concepten.
+\todo{Klopt dit volledig? Mijn heuristiek leidt afhankelijkheden af uit de relaties, maar dat is daarom niet het enige nut ervan.}
+%IMP laat toe relaties te specifi\"eren tussen concepten, gelijkaardig aan de relaties tussen tabellen in een database.
+%Uit deze relaties kunnen afhankelijkheden afgeleid worden.
+Aangezien deze relaties gespecifi\"eerd zijn tussen concepten, en concepten op verschillende machines kunnen staan, kan IMP afhankelijkheden over verschillende machines verwerken.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          Probleem/doelstelling                    %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-De doelstelling van deze thesis is een effici\"ente manier vinden om een configuratiemodel uit te rollen.
-Effici\"ent slaat hier vooral op het vermijden van extra deployment runs door rekening te houden met al dan niet impliciete afhankelijkheden.
+Als IMP in de vorm van vereisten en afhankelijkheden genoeg informatie krijgt kan het dus in \'e\'en keer een volledig model uitrollen.
+De doelstelling van deze thesis is aan de hand van heuristieken extra informatie uit het model halen en zo het aantal nodige deployment runs te verminderen.
+De veronderstelling is wel dat degene die het model opstelt genoeg domeinspecifieke informatie aanlevert die door deze heuristieken gebruikt kan worden.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          Kort: hoe oplossing + resultaten         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\big{TODO}

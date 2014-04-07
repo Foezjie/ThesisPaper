@@ -1,0 +1,27 @@
+set terminal pdf
+set output 'time_runs.pdf'
+
+unset log
+set auto x
+set xtic auto
+set grid y
+
+set key left
+set style data histograms
+set style histogram rowstacked
+
+set style fill solid
+ 
+set ylabel "Time"
+set y2label "#runs"
+set ytics nomirror
+set y2tics (0, 1, 2, 3)
+set yrange [0:500]
+set y2range [0:4]
+set tics out
+set xtic rotate by -45 scale 0
+
+
+plot 'time_runs.dat' using 2 t "run 1", '' using 3 t "run 2", '' using 4 t "run 3", '' using 5:xtic(1) t "run 4"
+#plot    'time_runs.dat' using 2:xtic(1) axes x1y1 title "time", \
+#        'time_runs.dat' using 3:xtic(1) axes x1y2 title"#runs"
