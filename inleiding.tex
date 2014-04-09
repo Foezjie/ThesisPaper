@@ -12,21 +12,21 @@ Dit is al een stap in de goede richting maar is nog steeds niet voldoende:
 als de uitvoering van een script afgebroken wordt blijft het systeem in een onstabiele toestand.\cite{sysadvent}
 
 Een andere manier om een verzameling gelijkaardige machines van hun initi\"ele configuratie te voorzien is het gebruik van images.
-Daarbij wordt eerst \'e\'en machine manueel geconfigureerd en daarna de volledige set-up gekloond naar de rest van de servers.
+Daarbij wordt eerst \'e\'en machine manueel geconfigureerd en daarna wordt de volledige set-up gekloond naar de rest van de servers.
 Deze methode werkt niet meer voor het verdere onderhoud van de configuraties.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          Overgaan naar de cloud                   %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Dit onderhoudsprobleem komt nog prominenter voor als de infrastructuur niet lokaal maar in de cloud gehost wordt.
-Een groot voordeel van werken in de cloud is de flexibiliteit waarmee servers kunnen toegevoegd en weggenomen kunnen worden.
+Een groot voordeel van werken in de cloud is de flexibiliteit waarmee servers kunnen toegevoegd en weggenomen worden.
 Dit proces gebeurt vaak zelfs automatisch waardoor manuele configuratie helemaal geen optie meer is. \todo{source?}
 In een dergelijke omgeving is een tool die uit zichzelf de volledige infrastructuur kan beheren bijna een noodzaak.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          Werking huidige tools                    %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Configuratiebeheergereedschappen (of CMS: Configuration Management Software, vanaf nu zal deze term gebruikt worden) zoals IMP\cite{IMP}, Puppet\cite{puppet}, CFEngine\cite{cfengine},\ldots laten toe op een effici\"ente manier IT infrastructuren op te zetten en onderhouden.
+Configuratiebeheergereedschappen (of CMS: Configuration Management Software, vanaf nu zal deze term gebruikt worden) zoals IMP\cite{IMP}, Puppet\cite{puppet}, CFEngine\cite{cfengine},\ldots laten toe op een effici\"ente manier IT-infrastructuren op te zetten en te onderhouden.
 De gebruiker van een dergelijke tool specifi\"eert eerst een model dat de gewenste toestand van de volledige infrastructuur beschrijft.
 Dit model bestaat uit een oplijsting van machines met de gewenste aanwezige resources (bestanden, mappen, services,\ldots) die ze moeten aanbieden.
 Sommige tools laten ook toe samenhorende resources te groeperen in een concept, zoals een webserver of een databaseserver.
@@ -41,7 +41,7 @@ Als er later nog aanpassingen moeten gebeuren moet enkel het model aangepast wor
 %          Dependencies gebruiken gaat beter        %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Een belangrijk aspect van elk gedistribueerd systeem zijn de afhankelijkheden die bestaan tussen de verschillende onderdelen.
-Stel het voorbeeld van een LAMP-stack: een Linux distributie met de Apache webserver, de MySQL database en PHP.
+Stel het voorbeeld van een LAMP-stack: een Linuxdistributie met de Apache webserver, de MySQL database en PHP.
 Daar kan de webserver niet zijn volledige functionaliteit aanbieden voordat de database online is.
 De webserver is dus afhankelijk van de databaseserver.
 Zolang PHP niet ge\"installeerd is kan de webserver ook geen dynamische pagina's aanbieden.
@@ -55,8 +55,8 @@ Een volledige mapping van de verschillende afhankelijkheden binnen de LAMP-stack
     \end{center}
 \end{figure}
 
-Als deze afhankelijkheden niet gespecifi\"eerd worden in het model kan de CMS er ook geen rekening mee houden.
-Het kan dat de tool het model in een foute volgorde uitrolt: eerst de webserver, dan php en uiteindelijk de database.
+Als deze afhankelijkheden niet gespecificeerd worden in het model kan de CMS er ook geen rekening mee houden.
+Het kan dat de tool het model in een foute volgorde uitrolt: eerst de webserver, dan PHP en uiteindelijk de database.
 De webserver zal bij het opstarten proberen te verbinden met de database, maar deze is nog niet online.
 In de tijd tussen het opstarten van de webserver en de installatie van PHP zal ze ook geen dynamische webpagina's kunnen tonen.
 Een op het eerste zicht succesvolle deployment run kan dus leiden tot een configuratie die niet volledig werkt.
@@ -79,9 +79,10 @@ Het aantal iteraties is afhankelijk van de hoeveelheid afhankelijkheden die best
 \end{figure}
 
 \todo{``sprong'' in onderwerp}
-Databases en webserver zijn abstracties die bestaan uit een verzameling basisobjecten zoals bestanden, pakketten en services.\todo{Beter woord voor abstracties}
-Tussen deze objecten bestaan er natuurlijk ook afhankelijkheden, bijvoorbeel tussen een bestand en de map waarin het staat:
-als de CMS eerst probeert het bestand te cree\"eren en dan pas de map zal de deployment run slechts gedeeltelijk slagen want een bestand kan niet bestaan zonder zijn parent folder.
+Databases en webservers zijn abstracties die bestaan uit een verzameling basisobjecten zoals bestanden, pakketten en services.\todo{Beter woord voor abstracties}
+Tussen deze objecten bestaan er natuurlijk ook afhankelijkheden, bijvoorbeeld tussen een bestand en de map waarin het staat:
+als de CMS eerst probeert het bestand te cree\"eren en dan pas de map zal de deployment run slechts gedeeltelijk slagen want een bestand kan niet bestaan
+zonder een bovenliggende map.
 Figuur \ref{fig:file_dir_dep} stelt deze afhankelijkheid nog eens grafisch voor.
 \begin{figure}
     \begin{center}
@@ -106,7 +107,7 @@ Het doel van deze thesis is dan ook om uit te zoeken hoe de software deze extra 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          Afhankelijkheden met huidige tools       %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-De huidige CMS laten toe om op het niveau van bestanden, packages en services vereisten en afhankelijkheden te specifi\"eren.
+De huidige CMS laten toe om op het niveau van bestanden, packages en services vereisten en afhankelijkheden te specificeren.
 De specificatie van een vereiste en een afhankelijkheid overlapt bij deze tools en wordt een ``requirement'' genoemd.
 Bij het uitrollen van een model gebruikt de software die informatie om een volgorde op te leggen waarmee de verschillende objecten aangemaakt worden.
 
@@ -124,7 +125,7 @@ De enige optie is dan meerdere keren het model uitrollen tot de configuratie cor
 IMP (Infrastructure Management Platform) is een nieuwe tool die momenteel nog in ontwikkeling is.
 Ze verschilt op twee vlakken van de andere CMS: gebruik van het model tijdens het uitrolproces en de specificatie van vereisten en afhankelijkheden.%het/het
 
-De andere aanpak tijdens het uitrollen van een model laat toe afhankelijkheden tussen hoog-niveau objecten te specifi\"eren:
+De andere aanpak tijdens het uitrollen van een model laat toe afhankelijkheden tussen hoog-niveau objecten te specificeren:
 in tegenstelling tot de vorige tools krijgt elke machine het volledige model ter beschikking en niet alleen zijn eigen deel.
 Machines kunnen zo niet alleen rekening te houden met afhankelijkheden en vereisten tussen eigen concepten maar ook tussen andere machines.
 
@@ -134,7 +135,7 @@ een vereiste is net zoals bij de andere tools een requirement, maar afhankelijkh
 %IMP laat toe relaties te specifi\"eren tussen concepten, gelijkaardig aan de relaties tussen tabellen in een database.
 %Uit deze relaties kunnen afhankelijkheden afgeleid worden.
 Aangezien IMP tijdens het uitrollen elke machine het volledig model ter beschikking stelt kunnen intermachinale afhankelijkheden ook verwerkt worden.
-%Aangezien deze relaties gespecifi\"eerd zijn tussen concepten, en concepten op verschillende machines kunnen uitgerold worden, kan IMP afhankelijkheden over verschillende machines verwerken.
+%Aangezien deze relaties gespecifi\"eerd zijn tussen concepten, en concepten op verschillende machines uitgerold kunnen worden, kan IMP afhankelijkheden over verschillende machines verwerken.
 %\todo{actief -> passief -> actief}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
