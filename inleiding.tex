@@ -5,10 +5,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Configuratiebeheergereedschappen zijn ontwikkeld om het leven van systeembeheerders makkelijker te maken.
 De serverinfrastructuren die ze moeten onderhouden worden steeds uitgebreider en complexer.
-Manueel elke server configureren kost niet alleen te veel tijd maar is ook erg foutgevoelig.
+Manueel elke server configureren kost niet alleen te veel tijd, maar is ook erg foutgevoelig.
 Er bestaan reeds verschillende oplossingen voor dit probleem.
 Een eerste manier is scripts gebruiken.
-Dit is al een stap in de goede richting maar is nog steeds niet voldoende: 
+Dit is al een stap in de goede richting, maar is nog steeds niet voldoende: 
 als de uitvoering van een script afgebroken wordt blijft het systeem in een onstabiele toestand.\cite{sysadvent}
 
 Een andere manier om een verzameling gelijkaardige machines van hun initi\"ele configuratie te voorzien is het gebruik van images.
@@ -18,9 +18,9 @@ Deze methode werkt niet meer voor het verdere onderhoud van de configuraties.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          Overgaan naar de cloud                   %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Dit onderhoudsprobleem komt nog prominenter voor als de infrastructuur niet lokaal maar in de cloud gehost wordt.
+Dit onderhoudsprobleem komt nog prominenter voor als de infrastructuur niet lokaal, maar in de cloud gehost wordt.
 Een groot voordeel van werken in de cloud is de flexibiliteit waarmee servers kunnen toegevoegd en weggenomen worden.
-Dit proces gebeurt vaak zelfs automatisch waardoor manuele configuratie helemaal geen optie meer is. \todo{source?}
+Dit proces gebeurt vaak automatisch waardoor manuele configuratie helemaal geen optie meer is. \todo{source?}
 In een dergelijke omgeving is een tool die uit zichzelf de volledige infrastructuur kan beheren bijna een noodzaak.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -40,14 +40,14 @@ Als er later nog aanpassingen moeten gebeuren moet enkel het model aangepast wor
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          Dependencies gebruiken gaat beter        %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Een belangrijk aspect van elk gedistribueerd systeem zijn de afhankelijkheden die bestaan tussen de verschillende onderdelen.
+Een belangrijk aspect van elk gedistribueerd systeem is de afhankelijkheden die bestaan tussen de verschillende onderdelen.
 Stel het voorbeeld van een LAMP-stack: een Linuxdistributie met de Apache webserver, de MySQL database en PHP.
 Daar kan de webserver niet zijn volledige functionaliteit aanbieden voordat de database online is.
 De webserver is dus afhankelijk van de databaseserver.
 Zolang PHP niet ge\"installeerd is kan de webserver ook geen dynamische pagina's aanbieden.
 Ze is dus ook afhankelijk van de PHP-installatie.
 Een volledige mapping van de verschillende afhankelijkheden binnen de LAMP-stack is te zien op figuur \ref{fig:lamp_dep}.
-\begin{figure}
+\begin{figure}[h]
     \begin{center}
     \includegraphics[width=0.6\textwidth]{images/lamp_dep.png}
     \caption{Grafische voorstelling van de afhankelijkheden binnen een LAMP-stack}
@@ -68,7 +68,7 @@ Tijdens de volgende deployment run zal de Apache service herstart worden en dan 
 CMS zal nooit aanpassingen maken die zorgen voor een configuratie die verder afwijkt van het model dan voorheen.
 Na een paar iteraties zal uiteindelijk altijd de gewenste configuratie bereikt worden. 
 Grafisch wordt dit voorgesteld op figuur \ref{fig:convergentie}.
-Het aantal iteraties is afhankelijk van de hoeveelheid afhankelijkheden die bestaan maar niet aanwezig zijn in het model.
+Het aantal iteraties is afhankelijk van de hoeveelheid afhankelijkheden die bestaan, maar niet aanwezig zijn in het model.
 
 \begin{figure}
     \begin{center}
@@ -86,8 +86,8 @@ zonder een bovenliggende map.
 Figuur \ref{fig:file_dir_dep} stelt deze afhankelijkheid nog eens grafisch voor.
 \begin{figure}
     \begin{center}
-    \includegraphics[width=0.6\textwidth]{images/file_dir_dep.png}
-    \caption{Grafische voorstelling van de afhankelijkheid tussen een bestand en zijn parent folder}
+    \includegraphics[width=0.6\textwidth]{images/file_dir_dep.pdf}
+    \caption{Grafische voorstelling van de afhankelijkheid tussen een bestand en zijn bovenliggende folder}
     \label{fig:file_dir_dep}
     \end{center}
 \end{figure}
@@ -98,10 +98,10 @@ Bij de LAMP-stack werd alles succesvol uitgerold, maar de gebruiker kan pas zien
 We maken dus het onderscheid tussen twee gevallen: vereisten en afhankelijkheden.
 In het geval van het bestand en de map is er sprake van een \textit{vereiste} die niet voldaan is: de map moet bestaan v\'o\'or het aanmaken van het bestand of deze wordt niet aangemaakt.
 In het geval van de LAMP-stack houdt de CMS geen rekening met de \textit{afhankelijkheid} tussen de webserver en de databaseserver.
-Alle resources worden foutloos aangemaakt maar toch werkt de uiteindelijke configuratie niet omdat een foute volgorde werd gehanteerd.
+Alle resources worden foutloos aangemaakt, maar toch werkt de uiteindelijke configuratie niet omdat een foute volgorde werd gehanteerd.
 In beide gevallen is een extra deployment run nodig voordat de configuratie correct werkt.
 
-Als de CMS wel rekening houdt met de afhankelijkheden en vereisten moet het model maar \'e\'en keer uitgerold worden.
+Als de CMS wel rekening houdt met de afhankelijkheden en vereisten moet het model, maar \'e\'en keer uitgerold worden.
 Het doel van deze thesis is dan ook om uit te zoeken hoe de software deze extra informatie automatisch uit het model kan afleiden.\todo{Doel pas later vermelden?}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -113,7 +113,7 @@ Bij het uitrollen van een model gebruikt de software die informatie om een volgo
 
 Deze tools compileren tijdens de deployment voor elke machine hun deel van het model.
 Elke machine krijgt dus enkel informatie over wat hij zelf moet doen.
-Afhankelijkheden en vereisten binnen eenzelfde machine verwerken is geen probleem maar tussen verschillende machines is dit niet mogelijk.
+Afhankelijkheden en vereisten binnen eenzelfde machine verwerken is geen probleem, maar tussen verschillende machines is dit niet mogelijk.
 Als de LAMP-stack op \'e\'en machine ge\"installeerd wordt kan de gebruiker nog aangeven dat de Apache service afhankelijk is van de databaseservice en PHP.
 Als daarintegen de Apache service op een machine draait en de MySQL-service op een andere kan de gebruiker dit niet meer aangeven.
 De enige optie is dan meerdere keren het model uitrollen tot de configuratie correct werkt.
@@ -127,7 +127,7 @@ Ze verschilt op twee vlakken van de andere CMS: gebruik van het model tijdens he
 
 De andere aanpak tijdens het uitrollen van een model laat toe afhankelijkheden tussen hoog-niveau objecten te specificeren:
 in tegenstelling tot de vorige tools krijgt elke machine het volledige model ter beschikking en niet alleen zijn eigen deel.
-Machines kunnen zo niet alleen rekening te houden met afhankelijkheden en vereisten tussen eigen concepten maar ook tussen andere machines.
+Machines kunnen zo niet alleen rekening houden met afhankelijkheden en vereisten tussen eigen concepten, maar ook tussen andere machines.
 
 Vervolgens maakt IMP, in tegenstelling tot andere tools, wel het onderscheid tussen vereisten en afhankelijkheden:
 een vereiste is net zoals bij de andere tools een requirement, maar afhankelijkheden worden gemodelleerd door middel van relaties tussen concepten.
