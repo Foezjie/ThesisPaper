@@ -2,72 +2,85 @@
 \zexternaldocument{analyse}
 
 \chapter{Evaluatie}
+\label{sec:evaluatie}
 Om de impact van de verschillende heuristieken te meten volgt nu een overzicht van de testresultaten.
-De heuristieken die te maken hebben met intermachinale afhankelijkheden werden grotendeels getest met behulp van een simulator.
-De werking van deze simulator wordt uitgelegd in sectie \ref{sec:simulator}
+Voor het merendeel van de testen is een simulator gebruikt.
+Sectie \ref{sec:simulator} legt uit waarom een simulator gebruikt wordt in plaats van IMP zelf, en hoe deze werkt.
 
-In de daarop volgende secties wordt voor elke heuristiek eerst nog een kort overzicht gegeven, dan de verwachte resultaten en uiteindelijk welke winst er uiteindelijk echt behaald werd.
-De algemene verwachting is dat het gebruiken van de heuristieken het aantal deployment runs verkleint en zo ook de totale uitroltijd.
-Deze optimalisatie kost wel extra verwerkingstijd (de uitvoering van de verschillende heuristieken) maar deze is normaal gezien te verwaarlozen ten
-opzichte van het volledige uitrolproces. 
+De daarop volgende secties bespreken de resultaten van elke heuristiek. 
+De algemene verwachting is dat het gebruik van heuristieken het aantal deployment runs reduceert en zo ook de totale uitroltijd.
+Deze optimalisatie kost wel extra verwerkingstijd (de uitvoering van de verschillende heuristieken) maar deze is normaal gezien te verwaarlozen ten opzichte van het volledige uitrolproces.\todo{meten} 
 
 \section{Simulator}
 \label{sec:simulator}
+Er zijn twee belangrijke voordelen aan het gebruiken van een simulator.
+Ten eerste is de uitroltijd evenredig met de grootte van het model.
+Zelfs met het gebruik van heuristieken om het aantal deployment runs te minimaliseren blijft een significant deel van het proces gespendeerd aan bijvoorbeeld het downloaden van pakketten. 
+Ten tweede laat een simulator toe modellen met honderden machines uit te rollen op \'e\'en enkele pc.
 
-Hoe groter het model wordt, hoe langer het duurt om alles volledig uitgerold te krijgen. 
-Zelfs met het gebruik van heuristieken om het aantal deployment runs te minimaliseren blijft een significant deel van het proces gespendeerd aan bijvoorbeeld het downloaden van packages. 
-Nog een reden om een simulator te ontwikkelen is dat deze ons toelaat modellen met honderden machines uit te rollen op \'e\'en enkele pc.
-
-De simulator bootst een systeem na dat Fedora 18 draait en gebruik maakt van de yum package manager.
+De simulator bootst een systeem na dat Fedora 18 draait en gebruik maakt van de yum pakket manager.
 
 \subsection{Uitwerking}
 \label{simulator:uitwerking}
-Aan IMP kan gevraagd worden om in plaats van het model uit te rollen, het model op te slaan in JSON formaat.
+Het proces begint nog altijd bij IMP zelf.
+Als de gebruiker de optie ``-j'' meegeeft compileert IMP het model volledig maar in plaats van het dan uit te rollen, schrijft hij het weg in een JSON bestand.
 De simulator gebruikt dat bestand als invoer om het uitrolproces te simuleren.
-Het resultaat van een simulatierun is een sqlite-database waarin alle hosts en hun resources vermeld staan.
+Het resultaat van een simulatierun is een sqlite-database waarin alle hosts en hun resources vermeld staan (de deployment database genoemd).
 Om de simulatie zo waarheidsgetrouw mogelijk te maken houdt de simulator rekening met volgende aspecten van het uitrolproces:
 
 \begin{itemize}
-  \item Bestanden en mappen kunnen niet aangemaakt worden voordat hun oudermap bestaat
-  \item Services kunnen niet gestart worden voordat het bijhorende package en bestanden aanwezig zijn
+  \item Bestanden en mappen kunnen niet aangemaakt worden voordat de bovenliggende map bestaat
+  \item Services kunnen niet gestart worden voordat het bijhorende pakket en bestanden aanwezig zijn
   \item Resources worden pas aangemaakt als hun afhankelijkheden voldaan zijn
 \end{itemize}
 
-De simulator maakt gebruik van twee externe informatiebronnen: een lijst van standaardmappen die aanwezig zijn na een nieuwe Fedora installatie en de repository data van verschillende yum repositories.
-Beide helpen bij het nakijken van de voorwaarden voor het aanmaken van respectievelijk bestanden of mappen en services:
-voordat een bestand weggeschreven wordt naar de database wordt gekeken of ofwel de parent folder al in de database staat, of dat het een standaardmap binnen Fedora is.
-Voor een service wordt in de repositorydata opgezocht welke bestanden normaal gezien deel zijn van de het pakket dat die service installeert en nagekeken of deze aanwezig zijn in de database.
-Om deze laatste check te kunnen doen worden bij het wegschrijven van een package ook alle bijhorende bestanden in de database opgeslagen.
+De simulator maakt gebruik van twee externe informatiebronnen: een lijst van standaard mappen die aanwezig zijn na een nieuwe Fedora installatie en de repository data van verschillende yum repositories.
+Beide helpen bij het correct uitrollen van de resources.
 
-De simulator gebruikt hetzelfde beslissingsproces om de uitrolvolgorde te bepalen als IMP.
-Dit valt het makkelijkst te beschrijven in pseudocode:
-
-\begin{lstlisting}
-%finished_deploying == True als er geen enkele agent nog resources moet deployen
-while not finished_deploying:
-    for agent in agents:
-        no_reqs = [write_to_database(res) for res in agent.resources if not res['requires']]
-        for agent in agents:
-          for res in agent.resources:
-              res.requires.remove(no_reqs)
+Het uitrollen van een file gaat als volgt:
+\begin{lstlisting}[showstringspaces=false]
+def deploy_file(file):
+  #Check if parent folder exists already
+  if file in std_filesystem or file in deployment_database:
+    deployment_database.write(file)
+  else:
+    error('Parent folder doesn't exist!')
 \end{lstlisting}
 
-%big project deploy met sim
-%real   3m36.324s
-%user    1m24.040s
-%sys 0m23.338s
+Het uitrollen van een service gaat als volgt: 
+\begin{lstlisting}
+def deploy_service(srv):
+  #Check if required files have been deployed
+  requirements = repodata_database.execute('select * from pkgdata where name like srv.name')
+  if all([req in deployment_database for req in requirements]):
+    deployment_database.write(srv)
+  else:
+    error('Not all required resources were deployed!')
+\end{lstlisting}
+
+Het uitrollen van een pakket gaat als volgt: 
+\begin{lstlisting}
+def deploy_package(pkg):
+  pkg_files = repodata_database.execute('select * from pkgdata where name like pkg.name') 
+  foreach file in pkg_files:
+    deployment_database.write(file)
+\end{lstlisting}
+We gaan er van uit dat fouten bij het uitrollen van een pakket de verantwoordelijkheid zijn van de package manager (hier yum), niet de CMS.
+
+\todo{Verschil in uitroltijd simulator/IMP?}
+\todo{Besluit sectie}
 
 \section{Afhankelijkheden tussen bestanden en mappen}
 \label{sec:bestanden_en_mappen_eval}
-Aangezien een bestand niet kan gecre\"eerd worden zonder zijn parent folder voegt deze heuristiek automatisch de afhankelijkheid tussen beide toe aan het model.
+Aangezien een bestand niet kan gecre\"eerd worden zonder zijn bovenliggende map voegt deze heuristiek automatisch de afhankelijkheid tussen beide toe aan het model.
 
-Om het effect van deze heuristiek te meten werden verschillende deployment runs gestart met en zonder gebruik van het algoritme.
-Sowieso zijn er altijd maar maximaal twee deployment runs nodig als geen heuristiek gebruikt wordt aangezien mappen altijd kunnen gecre\"eerd worden.
+Aangezien mappen altijd kunnen gecre\"eerd worden zijn er maximaal twee deployment runs nodig als er geen heuristiek gebruikt wordt.
+Bij gebruik van de heuristiek moet er exact \'e\'en uitgerold worden.
 De verwachting is dat het uitrollen met gebruik van de heuristiek dan ook ongeveer half zo lang duurt.
 
-Het resultaat van deze testen is te vinden in figuur \ref{fig:file_dir_times}.
-Elk datapunt is het gemiddelde van 30 runs, uitgevoerd op een virtuele machine met 2 cores van 2 Ghz en 2 GB RAM ter beschikking.
-
+Figuur \ref{fig:file_dir_times} toont de resultaten van deze test.
+Elk datapunt is het gemiddelde van 30 runs, uitgevoerd op een virtuele machine met twee cores van 2Ghz en 2GB RAM ter beschikking.
+Het model bestaat iedere keer uit vast aantal bestanden en mappen, \'e\'en bestand per map.
 \begin{figure}[h]
     \begin{center}
     \includegraphics[width=0.8\textwidth]{images/file_dir_times.pdf}
@@ -76,16 +89,19 @@ Elk datapunt is het gemiddelde van 30 runs, uitgevoerd op een virtuele machine m
     \end{center}
 \end{figure}
 
-De verwachtingen zijn volledig ingelost: zonder heuristiek zijn er twee deployment runs nodig dus is er dubbel zoveel tijd nodig.
+De verwachtingen zijn volledig ingelost: zonder heuristiek zijn er twee deployment runs nodig, met heuristiek slechts \'e\'en.
+Dit weerspiegelt zich in de gehalveerde uitroltijd.
 
-\section{Afhankelijkheden tussen services, packages en configuratiebestanden}
-\label{sec:srv_pkg_cfg_eval}
-De specificatie van een service in het configuratiemodel gaat vaak gepaard met de package en de configuratiebestanden die die service nodig heeft.
-Aangezien de service niet correct werkt zonder de aanwezigheid van de package en de bestanden voegt deze heuristiek de gepaste afhankelijkheden toe aan het model.
+\section{Afhankelijkheden tussen services, pakketten en configuratiebestanden}
+\label{sec:stacks_eval}
+De specificatie van een service in het configuratiemodel gaat vaak gepaard met de pakket en de configuratiebestanden die die service nodig heeft.
+Deze combinatie van resources wordt een stack genoemd.
+Aangezien de service niet correct werkt zonder de aanwezigheid van het pakket en de configuratiebestanden voegt deze heuristiek de gepaste vereisten toe aan het model.
 
-Om deze heuristieken te testen werd 30 keer NTP uitgerold op een testmachine.
-NTP bestaat uit \'e\'en package, \'e\'en configuratiebestand en \'e\'en service. 
-In het slechtste geval zijn er normaalgezien dus drie deployment runs nodig om de service correct werkende te krijgen.
+
+Voor deze test moest IMP 30 keer de NTP service uitrollen op een testmachine.
+NTP bestaat uit \'e\'en pakket, \'e\'en configuratiebestand en \'e\'en service. 
+In het slechtste geval zijn er normaal gezien dus drie deployment runs nodig om de service correct werkende te krijgen.
 Als de correcte afhankelijkheden worden opgesteld is er slechts \'e\'en run nodig.
 De testresultaten zijn te vinden in tabel \ref{table:service_package_dep}.
 
@@ -107,72 +123,99 @@ De testresultaten zijn te vinden in tabel \ref{table:service_package_dep}.
 %met: Avg time: 2.2067235755423704
 %deps toegevoegd: 3
 
-
-De verwachtingen worden weeral ingelost: dankzij de heuristiek is maar \'e\'en deployment run meer nodig.
-Dit resulteert niet in een halvering van de uitroltijd aangezien er altijd constante tijd gespendeerd wordt aan de initialisatie van IMP zelf.
+De resultaten van de test zijn zoals verwacht: dankzij de heuristiek is maar \'e\'en deployment run nodig.
 
 \section{Relaties en afhankelijkheden tussen hoog-niveau concepten}
-
-IMP laat toe om basisresources die logisch bij elkaar horen en hergebruikt kunnen worden te groeperen in een concept.
-Tussen deze concepten kunnen relaties gespecifi\"eerd worden.
-Stel het voorbeeld met een webserver en een databaseserver als concepten.
-De relatie tussen beide is als volgt:
-\begin{lstlisting}
-webserver [0:n] -- [1:n] databaseserver.
-\end{lstlisting}
-Hieruit leiden we af dat elke webserver altijd een database nodig heeft, maar niet omgekeerd.
-Deze afleiding geldt voor alle relaties met gelijkaardige multipliciteiten.
-
-Zoals vermeld in sectie \ref{sec:hoog_niveau_relaties} zorgt deze heuristiek niet zozeer voor een foutloos dan wel een effici\"enter uitrolproces.
-Om die reden \todo{aanvullen} 
-%No reqs: [10 runs]
-%Avg time: 276.6101951248
-%32428 Deployments avg: 3.0
-%
-%No reqs + use_rel_multiplicity en use_relations:
-%Stacks found: 392
-%Added 72 new dependencies
-%292 total dependencies, 645 new requirements added.(vooral depends on firewalld, flens)
-
-%Avg time: 203.78462052040013
-%Deployments avg: 2.0
+Door het omzetten van relaties naar afhankelijkheden kan het nodige aantal deployment runs gereduceerd worden.
 
 \section{Use cases}
 
 \subsection{Document processing}
 
-\todo{Uitleg geven over usecase}
+\todo{Uitleg geven over use case}
 
-In afbeelding \ref{fig:reqs} is te zien hoeveel requirements elke heuristiek toevoegen.
-De heuristiek die de parent folder toevoegt aan de requirements van een map of bestand wordt altijd uitgevoerd.
-Deze heuristiek beschouwen we namelijk als fundamenteel: de requirements die ze toevoegd zijn sowieso juist, terwijl de requirements die door andere heuristieken worden toegevoegd soms overbodig zijn. 
+\todo{Dit is eigenlijk geen uitleg van de toepassing van de heuristieken op de use case, meer een uitleg/test van de heuristieken}
+In afbeelding \ref{fig:reqs_doc} is te zien hoeveel vereisten elke heuristiek toevoegen.
+De heuristiek die de bovenliggende map toevoegt aan de vereisten van een map of bestand wordt altijd uitgevoerd.
+Deze heuristiek beschouwen we namelijk als fundamenteel: de vereisten die ze toevoegd zijn sowieso juist, terwijl sommige vereisten die door andere heuristieken worden toegevoegd mogelijks overbodig zijn. 
 
-We verwachten dat sommige heuristieken zullen overlappen, bijvoorbeeld ``stack'' en ``name''. 
+De verwachting is dat sommige heuristieken zullen overlappen, bijvoorbeeld ``stack'' en ``name''. 
 Resources binnen dezelfde stack hebben namelijk vaak een gelijkaardige naam. 
 
 \begin{figure}[h]
     \begin{center}
-    \includegraphics[width=0.8\textwidth]{images/reqs.pdf}
-    \caption{Aantal toegevoegde requirements voor elke combinatie van heuristieken}
-    \label{fig:reqs}
+    \includegraphics[width=0.8\textwidth]{images/reqs_doc.pdf}
+    \caption{Aantal toegevoegde vereisten voor elke combinatie van heuristieken in de document processing use case}
+    \label{fig:reqs_doc}
     \end{center}
 \end{figure}
 
-We zien inderdaad dat de heuristieken overlappen.
-Als een bepaalde heuristiek eerst toegepast wordt kan hij al zijn requirements toevoegen.
-Daaropvolgende heuristieken zullen enkel het deel van hun requirements toevoegen die nog niet deel uitmaken van het model.
-Ongeacht de volgorde zal een combinatie heuristieken altijd dezelfde set requirements toevoegen.
+Als een bepaalde heuristiek eerst toegepast wordt kan hij al zijn vereisten toevoegen.
+Daaropvolgende heuristieken zullen enkel het deel van hun vereisten toevoegen die nog niet deel uitmaken van het model.
+Ongeacht de volgorde zal een combinatie heuristieken altijd dezelfde set vereisten toevoegen.
 
-In afbeelding \ref{fig:time_runs} is te zien welke impact de toegevoegde requirements hebben op het uitrolproces.
+In afbeelding \ref{fig:time_runs_doc} is te zien welke impact de toegevoegde vereisten hebben op het uitrolproces.
 
 \begin{figure}[h]
     \begin{center}
-    \includegraphics[width=0.8\textwidth]{images/time_runs.pdf}
-    \caption{Gemiddelde uitroltijd en aantal deployment runs nodig voor elke combinate van heuristieken}
-    \label{fig:time_runs}
+    \includegraphics[width=0.8\textwidth]{images/time_runs_doc.pdf}
+    \caption{Gemiddelde aantal uitgerolde resources per deployment run voor elke combinate van heuristieken in de document processing use case}
+    \label{fig:time_runs_doc}
     \end{center}
 \end{figure}
 
-De resultaten bevestigen onze aanname dat het toevoegen van requirements kan leiden tot een daling in het aantal deployment runs.
+De resultaten bevestigen onze aanname dat het toevoegen van vereisten kan leiden tot een daling in het aantal deployment runs.
 Elke combinatie van de drie heuristieken leidt zelfs tot een ``one-shot'' uitrolproces waarin in \'e\'en keer het volledige model correct uitgerold wordt.
+
 \subsection{MongoDB}
+
+MongoDB is een van de meer bekende NoSQL databases.
+Een volledige configuratie bestaat uit verschillende services die elkaar ondersteunen.
+Figuur \ref{fig:mongodb_architecture} geeft een schematische voorstelling van een dergelijke set-up. \todo{cite}
+
+\begin{figure}[h]
+    \begin{center}
+    \includegraphics[width=0.8\textwidth]{images/mongodb_architecture.pdf}
+    \caption{Architectuur van de MongoDB database}
+    \label{fig:mongodb_architecture}
+    \end{center}
+\end{figure}
+
+In het model dat Thomas Uyttendaele opgesteld heeft \todo{cite} krijgen de onderdelen de volgende namen:
+
+\begin{table}[h!]
+  \begin{center}
+  \begin{tabular}{c | c}
+  Query Router  & AccessServer \\ \hline
+  Primary       & ReplicaSetController \\ \hline
+  Secondary     & Node \\ 
+  \end{tabular}
+  \end{center}
+\end{table}
+
+De onderdelen zullen pas correct kunnen samenwerken als ze in de juiste volgorde worden opgestart.
+Het is dus weerom \todo{Vroeger vermelden dat het van groot belang is dat het model compleet is} van groot belang dat alle afhankelijkheden in het model
+vermeld worden.
+
+Voor de volgende resultaten werd een instantie van MongoDB uitgerold met vijf nodes, verdeeld in twee replicasets van twee en drie nodes elk.
+Drie nodes nemen ook de rol van Query Router op zich.
+Figuur \ref{fig:reqs_mongo} toont de vereisten die elke combinatie van heuristieken toevoegt.
+
+\begin{figure}[h]
+    \begin{center}
+    \includegraphics[width=0.8\textwidth]{images/reqs_mongo.pdf}
+    \caption{Aantal toegevoegde vereisten voor elke combinatie van heuristieken bij MongoDB}
+    \label{fig:reqs_mongo}
+    \end{center}
+\end{figure}
+
+Figuur \ref{fig:time_runs_mongo} toont hoeveel deployment runs nodig zijn om een volledig werkende MongoDB database te bekomen, en hoeveel resources er
+per run gedeployed worden.
+
+\begin{figure}[h]
+    \begin{center}
+    \includegraphics[width=0.8\textwidth]{images/time_runs_mongo.pdf}
+    \caption{Gemiddelde aantal uitgerolde resources per deployment run voor elke combinate van heuristieken bij MongoDB}
+    \label{fig:time_runs_mongo}
+    \end{center}
+\end{figure}

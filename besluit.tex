@@ -1,2 +1,33 @@
 \chapter{Besluit}
-\label{besluit}
+\label{sec:besluit}
+
+\section{Gerelateerd werk}
+verwijzen naar overzichtspaper
+
+IBM
+
+\section{Verder werk}
+%Meer use cases%
+Een eerste taak is het testen van de heuristieken op enkele andere use cases om zo hun validiteit verder te bevestigen.
+Verder kan het bekijken van andere cases ook leiden tot het vinden van nieuwe heuristieken.
+Een deel van de heuristieken werden namelijk ge\"introduceerd na onderzoek van de document processing use case. 
+
+%kijken welke subset van deps nu echt nodig is.%
+Een tweede onderzoeksvraag die verder kan onderzocht worden is wat de minimale set vereisten is om een model correct uit te rollen.
+De huidige heuristieken voegen liever een extra vereiste toe dan \'e\'en te weinig.
+Deze aanpak is goed zolang er geen incorrecte of overbodige vereisten worden toegevoegd.
+Elke vereiste moet verwerkt worden door IMP en zorgt dus voor een kleine verhoging in de uitvoertijd.
+Een minimale set vereisten heeft dus een positief effect op de totale uitroltijd.
+
+%Deletes%
+In tegenstelling tot andere CMS laat IMP toe afhankelijkheden en relaties te specifi\"eren.
+Deze thesis gebruikt die extra informatie om het uitrolproces te optimaliseren.
+Het is aan de creativiteit van de gebruiker om nog andere doeleinden te vinden.
+Een mogelijkheid is uitzoeken hoe beter omgegaan kan worden met resources die in \'e\'en versie van het model staan maar niet meer in een volgende versie.
+Momenteel stopt alle CMS dan met het onderhoud van die resource. 
+In sommige gevallen kan dit ongewenste gevolgen hebben: een database die online blijft maar een niet meer geupdated wordt is een veiligheidsrisico.
+De service stoppen als ze niet meer in het model vermeld staat zou hier een betere optie zijn.
+Hierbij kan bijvoorbeeld de database resource weten of hij nog in de configuratie van zijn client staat door te kijken naar de relatie die beide hebben.
+Dit is maar \'e\'en voorbeeld van wat de extra informatie in het model toelaat.
+
+zoeken van cycles in dependencies

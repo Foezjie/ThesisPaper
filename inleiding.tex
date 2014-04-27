@@ -13,7 +13,7 @@ als de uitvoering van een script afgebroken wordt blijft het systeem in een onst
 
 Een andere manier om een verzameling gelijkaardige machines van hun initi\"ele configuratie te voorzien is het gebruik van images.
 Daarbij wordt eerst \'e\'en machine manueel geconfigureerd en daarna wordt de volledige set-up gekloond naar de rest van de servers.
-Deze methode werkt niet meer voor het verdere onderhoud van de configuraties.
+Deze methode werkt niet meer voor het verdere onderhoud van de machines.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          Overgaan naar de cloud                   %
@@ -49,7 +49,7 @@ Ze is dus ook afhankelijk van de PHP-installatie.
 Een volledige mapping van de verschillende afhankelijkheden binnen de LAMP-stack is te zien op figuur \ref{fig:lamp_dep}.
 \begin{figure}[h]
     \begin{center}
-    \includegraphics[width=0.6\textwidth]{images/lamp_dep.png}
+    \includegraphics[width=0.6\textwidth]{images/lamp_dep.pdf}
     \caption{Grafische voorstelling van de afhankelijkheden binnen een LAMP-stack}
     \label{fig:lamp_dep}
     \end{center}
@@ -72,7 +72,7 @@ Het aantal iteraties is afhankelijk van de hoeveelheid afhankelijkheden die best
 
 \begin{figure}
     \begin{center}
-    \includegraphics[width=0.6\textwidth]{images/convergentie.png}
+    \includegraphics[width=0.6\textwidth]{images/convergentie.pdf}
     \caption{Grafische voorstelling van de convergentie na een reeks deployment runs.}
     \label{fig:convergentie}
     \end{center}
@@ -101,7 +101,7 @@ In het geval van de LAMP-stack houdt de CMS geen rekening met de \textit{afhanke
 Alle resources worden foutloos aangemaakt, maar toch werkt de uiteindelijke configuratie niet omdat een foute volgorde werd gehanteerd.
 In beide gevallen is een extra deployment run nodig voordat de configuratie correct werkt.
 
-Als de CMS wel rekening houdt met de afhankelijkheden en vereisten moet het model, maar \'e\'en keer uitgerold worden.
+Als de CMS wel rekening houdt met de afhankelijkheden en vereisten moet het model maar \'e\'en keer uitgerold worden.
 Het doel van deze thesis is dan ook om uit te zoeken hoe de software deze extra informatie automatisch uit het model kan afleiden.\todo{Doel pas later vermelden?}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -144,7 +144,7 @@ Aangezien IMP tijdens het uitrollen elke machine het volledig model ter beschikk
 IMP kan het volledig model in \'e\'en keer uitrollen als het genoeg informatie krijgt in de vorm van vereisten en afhankelijkheden.
 De doelstelling van deze thesis is aan de hand van heuristieken extra informatie uit het model halen en zo het aantal nodige deployment runs te verminderen.
 De veronderstelling is wel dat degene die het model opstelt genoeg domeinspecifieke informatie aanlevert die door deze heuristieken gebruikt kan worden.
-
+\todo{Belang van correct uitrollen: kan soms interessanter zijn dan snel uitrollen}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          Kort: hoe oplossing + resultaten         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -3,7 +3,7 @@
 \setup{title={Configuratieafhankelijkheden gebruiken om gedistribueerde applicaties effici\"ent te beheren in een hybride cloud},
   author={Harm De Weirdt},
   promotor={Prof.\,dr.\,ir.\ Wouter Joosen},
-  assessor={Ir.\,W. Eetveel\and W. Eetrest}, %TODO
+  assessor={Ir.\,W. Eetveel\and W. Eetrest},
   assistant={Ir.\ Bart Vanbrabant}}
 % De volgende \setup mag verwijderd worden als geen fiche gewenst is.
 \setup{filingcard,
@@ -38,44 +38,60 @@
 
 % Hier kun je dan nog andere pakketten laden of eigen definities voorzien
 
-% Tenslotte wordt hyperref gebruikt voor pdf bestanden.
-% Dit mag verwijderd worden voor de af te drukken versie.
-\usepackage[pdfusetitle,colorlinks,plainpages=false]{hyperref}
 
 \usepackage{todonotes}
 \usepackage{color}
 \usepackage{listings}
 \usepackage{zref-xr}
+\usepackage{enumitem}
 
 \lstset{
-        language=python,
-        basicstyle=\ttfamily\scriptsize,
-        breaklines=true
+    showstringspaces=false,
+    language=python,
+    basicstyle=\ttfamily\scriptsize,
+    breaklines=true
 }
 
+% Tenslotte wordt hyperref gebruikt voor pdf bestanden.
+% Dit mag verwijderd worden voor de af te drukken versie.
+\usepackage[pdfusetitle,colorlinks,plainpages=false]{hyperref}
 
 \begin{document}
-
+\todo{Assesor aanpassen in preamble}
 \begin{preface}
-  Dit is mijn dankwoord om iedereen te danken die mij bezig gehouden heeft.
-  Hierbij dank ik mijn promotor, mijn begeleider en de voltallige jury.
-  Ook mijn familie heeft mij erg gesteund natuurlijk.
+  Vooraf wil ik graag de mensen bedanken die mij geholpen hebben bij het schrijven van deze thesis: 
+mijn ouders, die het mogelijk maakten om deze studies te volgen en mij hielpen waar mogelijk.
+Mijn begeleider, Bart Vanbrabant, voor de hulp, het geduld en de motivatie die hij gegeven
+heeft het afgelopen jaar.
+Thomas Margot, Yoshi Delaey, Hilke Cottenie en vele anderen voor het overlezen en corrigeren van de tekst.
+Kjell Deturck voor de emotionele steun in de moeilijkere momenten.
+Karlijn Ongena voor het vermelden van mijn naam in haar thesis.
 \end{preface}
 
 \tableofcontents*
 
 \begin{abstract}
-  In dit \texttt{abstract} environment wordt een al dan niet uitgebreide
-  samenvatting van het werk gegeven. De bedoeling is wel dat dit tot
-  1~bladzijde beperkt blijft.
+  Configuratiemanagementsoftware is een vereiste geworden bij het onderhoud van grote gedistribueerde systemen.
+  Ze laat toe een declaratief model op te stellen van de gewenste configuratie, waarna de software zorgt voor het correct uitrollen.
+  In dit model staan de verschillende resources die deel uitmaken van de opstelling.
+  Tussen deze resources kunnen afhankelijkheden en vereisten opgesteld worden. 
+  Zo is er bijvoorbeeld de aanwezigheid van een bovenliggende map een vereiste voor het cree\"eren van een bestand,
+  of de installatie van een pakket een vereiste voor het opstarten van de bijhorende service.
+  Een webserver kan afhankelijk zijn van een databaseserver voor het aanbieden van bepaalde functionaliteit.
+  Als de vereisten en afhankelijkheden niet gespecificeerd (kunnen) worden in het model moet het uitrolproces vaak meerdere keren gestart worden voordat alle resources correct interageren.
 
+  Deze thesis maakt gebruikt van IMP, een nieuwe configuratietool die toelaat zowel afhankelijkheden als vereisten te modelleren.
+  Er wordt onderzocht hoe aan de hand van heuristieken extra vereisten en afhankelijkheden kunnen toegevoegd worden om zo het aantal uitrolprocessen te reduceren.
+
+ Uit de resultaten blijkt dat het gebruik van heuristieken succesvol het aantal uitrolprocessen reduceert.
+ Toegepast op een use case van een complex document processing systeem is slechts \'e\'en proces meer nodig.
 \end{abstract}
 
 % Een lijst van figuren en tabellen is optioneel
 %\listoffigures
 %\listoftables
 % Bij een beperkt aantal figuren en tabellen gebruik je liever het volgende:
-\listoffiguresandtables
+% \listoffiguresandtables
 
 \mainmatter
 
