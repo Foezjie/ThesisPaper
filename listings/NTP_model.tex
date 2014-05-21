@@ -1,0 +1,36 @@
+\begin{minipage}
+\begin{lstlisting}[label=listing:NTP_model]
+entity Ntpd extends ip::services::Client:
+    """
+        An ntp daemon that connects to ntp servers to synchronise time 
+    """
+end
+
+entity ExternalNtpServer extends ip::services::VirtualServer:
+    """
+        An external ntp server used as time source    
+    """
+end
+implement ExternalNtpServer using std::none
+
+typedef ExternalServer as ExternalNtpServer(services = s_ntp)
+
+ntp_range = ip::Port(low = 123)
+tcp_ntp = ip::DstService(proto = "tcp", dst_range = ntp_range)
+udp_ntp = ip::DstService(proto = "udp", dst_range = ntp_range)
+
+s_ntp = [tcp_ntp, udp_ntp]
+
+Ntpd ntpd [0:] -- [1:] ExternalNtpServer external_servers
+
+implementation ntpdServer for Ntpd:
+    """
+        Implement ntpd with a simple ntpd daemon
+    """
+    pkg = std::Package(name = "ntp", state = "installed", host = host)
+    cfg = std::ConfigFile(path = "/etc/ntp.conf", content = std::template("ntp/ntp.conf.tmpl"), host = host, reload = true)
+    svc = std::Service(name = "ntpd", state = "running", onboot = true, requires = [pkg, cfg], host = host)
+end
+implement Ntpd using ntpdServer
+\end{lstlisting}
+\end{minipage}

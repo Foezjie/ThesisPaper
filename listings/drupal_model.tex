@@ -1,0 +1,46 @@
+\begin{minipage}
+\begin{lstlisting}[label=listing:drupal_model]
+entity Common:
+    """
+        Add drupal support to a server
+    """
+end
+
+std::Host host [1] -- [0:1] Common drupal_common
+
+entity Site:
+    """
+        Installs a drupal site in a virtual host.
+    """
+end
+
+Site drupal_site [0:1] -- [1] httpd::Vhost vhost
+Site drupal_site [0:1] -- [1] mysql::Database database
+
+implementation common:
+    std::Package(host = host, name = "drupal7", state = "installed")
+end
+
+implement Common using common
+
+implementation drupalSite:
+    host = vhost.webserver.host
+    pkg = std::Package[host = host, name = "drupal7"]
+
+    httpd::Alias(vhost = vhost, web = "/", dir = "/usr/share/drupal7/")
+
+    drupal_cfg = std::ConfigFile(host = host, path = "/etc/drupal7/{{ vhost.name.name }}/settings.php",
+        content = template("drupal/settings.php.tmpl"), provides = vhost.webserver,
+        requires = drupal_settings_dir)
+    
+    drupal_settings_dir = std::Directory(host = host, path = "/etc/drupal7/{{ vhost.name.name }}",
+        owner = "root", group = "root", mode = 755, requires = pkg)
+    drupal_files_dir = std::Directory(host = host, path = "/var/lib/drupal7/files/{{ vhost.name.name }}",
+        owner = "root", group = "apache", mode = 775, requires = pkg)
+    drupal_file_link = std::Symlink(host = host, source = "/var/lib/drupal7/files/{{ vhost.name.name }}",
+        target = "/etc/drupal7/{{ vhost.name.name }}/files", requires = drupal_files_dir)
+end
+
+implement Site using drupalSite
+\end{lstlisting}
+\end{minipage}

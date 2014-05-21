@@ -1,0 +1,29 @@
+\BOOKMARK [0][-]{chapter*.2}{Voorwoord}{}% 1
+\BOOKMARK [0][-]{chapter*.3}{Samenvatting}{}% 2
+\BOOKMARK [0][-]{chapter.1}{Inleiding}{}% 3
+\BOOKMARK [0][-]{chapter.2}{IMP}{}% 4
+\BOOKMARK [1][-]{section.2.1}{Configuratiemanagement}{chapter.2}% 5
+\BOOKMARK [1][-]{section.2.2}{Werking}{chapter.2}% 6
+\BOOKMARK [0][-]{chapter.3}{Naar het automatisch toevoegen van vereisten en afhankelijkheden}{}% 7
+\BOOKMARK [1][-]{section.3.1}{Vereisten tussen bestanden en mappen}{chapter.3}% 8
+\BOOKMARK [1][-]{section.3.2}{Vereisten tussen services, packages en configuratiebestanden}{chapter.3}% 9
+\BOOKMARK [1][-]{section.3.3}{Vereisten tussen resources met gelijkaardige naam}{chapter.3}% 10
+\BOOKMARK [1][-]{section.3.4}{Afhankelijkheden door relaties}{chapter.3}% 11
+\BOOKMARK [1][-]{section.3.5}{Vereisten door afhankelijkheden}{chapter.3}% 12
+\BOOKMARK [1][-]{section.3.6}{Besluit van dit hoofdstuk}{chapter.3}% 13
+\BOOKMARK [0][-]{chapter.4}{Evaluatie}{}% 14
+\BOOKMARK [1][-]{section.4.1}{Simulator}{chapter.4}% 15
+\BOOKMARK [1][-]{section.4.2}{Afhankelijkheden tussen bestanden en mappen}{chapter.4}% 16
+\BOOKMARK [1][-]{section.4.3}{Afhankelijkheden tussen services, pakketten en configuratiebestanden}{chapter.4}% 17
+\BOOKMARK [1][-]{section.4.4}{Relaties en afhankelijkheden tussen hoog-niveau concepten}{chapter.4}% 18
+\BOOKMARK [1][-]{section.4.5}{Use cases}{chapter.4}% 19
+\BOOKMARK [0][-]{chapter.5}{Besluit}{}% 20
+\BOOKMARK [1][-]{section.5.1}{Gerelateerd werk}{chapter.5}% 21
+\BOOKMARK [1][-]{section.5.2}{Verder werk}{chapter.5}% 22
+\BOOKMARK [0][-]{appendix.A}{Code van de heuristieken}{}% 23
+\BOOKMARK [1][-]{section.A.1}{Bestanden en mappen}{appendix.A}% 24
+\BOOKMARK [1][-]{section.A.2}{Services, packages en configuratiebestanden}{appendix.A}% 25
+\BOOKMARK [1][-]{section.A.3}{Resources met gelijkaardige namen}{appendix.A}% 26
+\BOOKMARK [1][-]{section.A.4}{Afhankelijkheden door relaties}{appendix.A}% 27
+\BOOKMARK [1][-]{section.A.5}{Vereisten door afhankelijkheden}{appendix.A}% 28
+\BOOKMARK [0][-]{section*.47}{Bibliografie}{}% 29

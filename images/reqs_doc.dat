@@ -1,0 +1,18 @@
+#dep name rel stack dir
+name 350 0 0 93 
+name_rel 350 102 0 93
+name_rel_stack 350 102 214 93
+name_stack 350 0 214 93
+name_stack_rel 350 102 214 93
+rel 0 102 0 93
+rel_name 350 102 0 93
+rel_name_stack 350 102 214 93
+rel_stack 0 102 413 93
+rel_stack_name 151 102 413 93
+stack 0 0 413 93
+stack_name 151 0 413 93
+stack_name_rel 151 102 413 93
+stack_rel 0 102 413 93
+stack_rel_name 151 102 413 93
+#user 
+#noreqs 0 0 0 0

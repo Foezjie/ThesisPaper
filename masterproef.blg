@@ -1,0 +1,68 @@
+This is BibTeX, Version 0.99d (TeX Live 2013)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: masterproef.aux
+A level-1 auxiliary file: inleiding.aux
+A level-1 auxiliary file: imp.aux
+A level-1 auxiliary file: analyse.aux
+A level-1 auxiliary file: evaluatie.aux
+A level-1 auxiliary file: besluit.aux
+A level-1 auxiliary file: app-A.aux
+The style file: unsrt.bst
+Database file #1: referenties.bib
+Warning--entry type for "sysadvent" isn't style-file defined
+--line 58 of file referenties.bib
+Warning--entry type for "puppet" isn't style-file defined
+--line 66 of file referenties.bib
+Warning--entry type for "puppet-orchestration" isn't style-file defined
+--line 72 of file referenties.bib
+Warning--entry type for "cfengine" isn't style-file defined
+--line 78 of file referenties.bib
+Warning--entry type for "ansible" isn't style-file defined
+--line 84 of file referenties.bib
+Warning--empty year in why_do_upgrades_fail
+Warning--empty year in opening_the_clouds
+Warning--empty journal in deploying_elastic_services
+Warning--empty year in deploying_elastic_services
+Warning--empty year in IMP
+You've used 9 entries,
+            1791 wiz_defined-function locations,
+            491 strings with 5264 characters,
+and the built_in function-call counts, 1768 in all, are:
+= -- 151
+> -- 61
+< -- 3
++ -- 25
+- -- 16
+* -- 74
+:= -- 228
+add.period$ -- 26
+call.type$ -- 9
+change.case$ -- 9
+chr.to.int$ -- 0
+cite$ -- 14
+duplicate$ -- 99
+empty$ -- 206
+format.name$ -- 16
+if$ -- 440
+int.to.chr$ -- 0
+int.to.str$ -- 9
+missing$ -- 4
+newline$ -- 44
+num.names$ -- 5
+pop$ -- 54
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 79
+stack$ -- 0
+substring$ -- 47
+swap$ -- 40
+text.length$ -- 3
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 5
+while$ -- 9
+width$ -- 10
+write$ -- 81
+(There were 10 warnings)

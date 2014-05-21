@@ -1,0 +1,53 @@
+\begin{thebibliography}{1}
+
+\bibitem{why_do_upgrades_fail}
+Tudor Dumitras and Priya Narasimhan.
+\newblock Why do upgrades fail and what can we do about it?: toward dependable,
+  online upgrades in enterprise system.
+\newblock In {\em Proceedings of the 10th {ACM/IFIP/USENIX} International
+  Conference on Middleware}, page~18. Springer-Verlag New York, Inc.
+
+\bibitem{sysadvent}
+Jordan Sissel.
+\newblock Sysadvent: Day 19 - why use configuration management?
+\newblock
+  \url{http://sysadvent.blogspot.be/2011/12/day-19-why-use-configuration-management.html}.
+
+\bibitem{opening_the_clouds}
+Damien Cerbelaud, Shishir Garg, and Jeremy Huylebroeck.
+\newblock Opening the clouds: qualitative overview of the state-of-the-art open
+  source (vm-based) cloud management platforms.
+\newblock In {\em Proceedings of the 10th (ACM/IFIP/USENIX) International
+  Conference on Middleware}, page~22. Springer-Verlag New York, Inc.
+
+\bibitem{deploying_elastic_services}
+Johannes Kirschnick, Jose~M. Alcaraz~Calero, Patrick Goldsack, Andrew Farrell,
+  Julio Guijarro, Steve Loughran, Nigel Edwards, and Lawrence Wilcock.
+\newblock Towards an architecture for deploying elastic services in the cloud.
+\newblock 42(4):395--408.
+
+\bibitem{ansible}
+Ansible is simple {IT} automation.
+\newblock \url{http://www.ansible.com/home}.
+
+\bibitem{puppet}
+Puppet labs: {IT} automation software for system administrators.
+\newblock \url{http://puppetlabs.com/}.
+
+\bibitem{cfengine}
+Configuration management software {\textbar} open source configuration
+  management - {CFEngine} - distributed configuration management.
+\newblock \url{http://cfengine.com/}.
+
+\bibitem{puppet-orchestration}
+Feature \#16187: Relationships should work between hosts - puppet - puppet
+  labs.
+\newblock \url{http://projects.puppetlabs.com/issues/16187}.
+
+\bibitem{IMP}
+Bart Vanbrabant and Wouter Joosen.
+\newblock A framework for integrated configuration management tools.
+\newblock In {\em Integrated Network Management ({IM} 2013), 2013 {IFIP/IEEE}
+  International Symposium on}, page 534–540. {IEEE}.
+
+\end{thebibliography}

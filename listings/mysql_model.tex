@@ -1,0 +1,38 @@
+\begin{minipage}
+\begin{lstlisting}[label=listing:mysql_model]
+entity MysqlServer extends ip::services::Server:
+    """
+        Mysql server configuration
+    """
+end
+
+entity Database:
+    string name
+    string user
+    string password
+end
+
+MysqlServer server [1] -- [0:] Database databases
+
+typedef Server as MysqlServer(services = mysql::s_server)
+
+mysql_server_range = ip::Port(low = 3306)
+s_server = ip::DstService(proto = "tcp", dst_range = mysql_server_range)
+
+implement Database using std::none
+implement MysqlServer using mysqlRedhat when host.os is "redhat"
+
+implementation mysqlRedhat for MysqlServer:
+    # install mysql server
+    pkg = std::Package(host = host, name = "mysql-server", state = "installed")
+    svc = std::Service(host = host, name = "mysqld", state = "running", onboot = true)
+    svc.requires = [pkg, config, conf_dir]
+
+    config = std::ConfigFile(host = host, path = "/etc/my.cnf", content = template("mysql/my.cnf.tmpl"), requires = pkg, reload = true)
+    conf_dir = std::Directory(host = host, path = "/etc/mysql.conf.d", owner = "root", group = "root", mode = 755)
+
+    dblist = std::ConfigFile(host = host, path = "/etc/sysconfig/mysql", reload = true,
+        content = template("mysql/databases.tmpl"))
+end
+\end{lstlisting}
+\end{minipage}

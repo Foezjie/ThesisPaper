@@ -1,6 +1,186 @@
-\chapter{De eerste bijlage}
-\label{app:A}
-In de bijlagen vindt men de data terug die nuttig kunnen zijn voor de
-lezer, maar die niet essentieel zijn om het betoog in de normale tekst te
-kunnen volgen. Voorbeelden hiervan zijn bronbestanden,
-configuratie-informatie, langdradige wiskundige afleidingen, enz.
+\chapter{Code van de heuristieken}
+\label{app:code}
+\section{Bestanden en mappen}
+\begin{minipage}{\textwidth}
+\begin{lstlisting}[language=Python]
+def dir_before_file(model, resources):
+    for _id, resource in resources.items():
+        model = resource.model
+        res_class = model.__class__
+        if model.__module__ == "std" and (res_class.__name__ == "File" or res_class.__name__ == "Directory"):
+            host = model.host
+ 
+            for dir in host.directories:
+                dir_res = Resource.get_resource(dir)
+                if dir_res is not None and os.path.dirname(resource.path) == dir_res.path:
+                    if dir_res.id not in resource.requires:
+                        resource.requires.add(dir_res.id)
+\end{lstlisting}
+\end{minipage}
+
+\section{Services, packages en configuratiebestanden}
+\subsection{Methode 1}
+\begin{minipage}{\textwidth}
+\begin{lstlisting}[language=Python]
+TODO: herschrijven
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Methode 2}
+\begin{minipage}{\textwidth}
+\begin{lstlisting}
+def scope_dependencies(model, resources):
+    srv_stacks = find_srv_stacks(resources)
+    deps_per_stack = [] 
+    for stack in srv_stacks:
+        deps_per_stack.append(setup_stack_deps(stack))
+ 
+def find_srv_stacks(resources):
+    stacks = []
+    for res in resources.values():
+        scope_pkg = []
+        scope_cfg = []
+        scope_srv = []
+        model_instance = res.model
+        instance_scope = model_instance.__scope__
+        scope_vars = instance_scope.variables()
+        scope_cfg = [x.value for x in scope_vars if x.value.__class__.__name__ == "File"]
+        scope_srv = [x.value for x in scope_vars if x.value.__class__.__name__ == "Service"]
+        scope_pkg = [x.value for x in scope_vars if x.value.__class__.__name__ == "Package"]
+ 
+        if scope_srv and (scope_pkg or scope_cfg):
+            stacks.append({'pkg': scope_pkg, 'srv': scope_srv, 'cfg': scope_cfg})
+ 
+    return stacks
+ 
+def setup_stack_deps(stack):
+    deps = 0
+    for srv in stack['srv']:
+        srv = Resource.get_resource(srv)
+        for pkg in stack['pkg']:
+            pkg = Resource.get_resource(pkg)
+            if pkg.id not in srv.requires:
+                srv.requires.add(pkg.id)
+                deps = deps + 1
+        for cfg in stack['cfg']:
+            cfg = Resource.get_resource(cfg)
+            if cfg.id not in srv.requires:
+                srv.requires.add(cfg.id)
+                deps = deps + 1
+    for cfg in stack['cfg']:
+        cfg = Resource.get_resource(cfg)
+        for pkg in stack['pkg']:
+            pkg = Resource.get_resource(pkg)
+            if pkg.id not in cfg.requires:
+                cfg.requires.add(pkg.id)
+                deps = deps + 1
+    return deps
+
+\end{lstlisting}
+\end{minipage}
+
+\section{Resources met gelijkaardige namen}
+\begin{minipage}{\textwidth}
+\begin{lstlisting}
+def name_dependencies(model, resources):
+    deps = 0
+    for _id, res in resources.items():
+        similar_resources = []
+        res_model = res.model
+        if res_model.__module__ == "std" and res_model.__class__.__name__ == "Service":
+            for other_id, other_res in resources.items():
+                similar_reg = re.compile("std::File.*%s.*%s.*" % (res.model.host.name, res.name))
+                if other_res.model.__class__.__name__ == "File" and similar_reg.match(str(other_id)):
+                    similar_resources.append(other_res)
+            
+            for similar_res in similar_resources:
+                if similar_res.id not in res.requires:
+                    res.requires.add(similar_res.id)
+ 
+        if res_model.__module__ == "std" and res_model.__class__.__name__ == "Package":
+            pkg_name = ''.join(i for i in res.name if not i.isdigit())
+            pkg_name = pkg_name.split("-")[0]
+            for other_id, other_res in resources.items():
+                similar_reg = re.compile("std::File.*%s.*%s.*" % (res.model.host.name, pkg_name))
+                if other_res.model.__class__.__name__ == "File" and similar_reg.match(str(other_id)):
+                    similar_resources.append(other_res)
+            
+            for similar_res in similar_resources:
+                if res.id not in similar_res.requires and similar_res not in res.requires:
+                    similar_res.requires.add(res.id)
+\end{lstlisting}
+\end{minipage}
+
+\section{Afhankelijkheden door relaties}
+\begin{minipage}{\textwidth}
+\begin{lstlisting}
+def use_rel_multiplicity(model, resources):
+    added = 0
+    for lib in model.get_scopes():
+        for concept in lib.variables():
+            if concept.get_name().startswith("Entity"):
+                for attr_name in concept.value.get_all_attribute_names(): #anders niet de attr vd parents
+                    attr_value = concept.value.get_attribute(attr_name)
+                    if hasattr(attr_value, "end"): #Kijk of het een relatie is
+                        attr_end = attr_value.end
+                        if attr_end.low >= 1 and attr_end.end.low == 0 and not attr_value.depends:
+                            added = added + 1
+                            attr_value.depends = True 
+\end{lstlisting}
+\end{minipage}
+
+\section{Vereisten door afhankelijkheden}
+\begin{minipage}{\textwidth}
+\begin{lstlisting}
+def use_relations(model, resources):
+    depends = 0
+    added = 0
+    for lib in model.get_scopes():
+        for concept in lib.variables():
+            if concept.get_name().startswith("Entity"):
+                concept_services = get_services(concept)
+                if concept_services is not None: #Als er geen services zijn moeten er sowieso geen deps opgesteld worden
+                    for attr_name in concept.value.get_all_attribute_names(): #anders niet de attr vd parents
+                        attr_value = concept.value.get_attribute(attr_name)
+                        if hasattr(attr_value, "end"): #Kijk of het een relatie is
+                            if attr_value.end.depends: #Kijk of het concept afhankelijk is vd andere kant
+                                depends = depends + 1
+                                for instance in concept.value: #Voor elke instantie v/h concept de deps opstellen
+                                    req_concepts = getattr(instance, attr_name)
+                                    req_resources = []
+                                    if hasattr(req_concepts, 'append'): #Check if QList
+                                        for req_concept in req_concepts:
+                                            for srv in get_child_services(req_concept):
+                                                req_resources.append(srv)
+                                    else:
+                                        for srv in get_services(req_concepts):
+                                                req_resources.append(srv)
+                                    for req_res in req_resources:
+                                        for service in concept_services:
+                                            if req_res not in service.requires and req_res.state != "stopped":
+                                                service.requires.add(req_res)
+
+def get_child_services(object):
+    services = []
+    for child_res in object._childeren:
+            if child_res.__module__ == "std" and child_res.__class__.__name__ == "Service":
+                services.append(Resource.get_resource(child_res))
+    return services
+ 
+def get_services(concept):
+    found_services = []
+    
+    if hasattr(concept, "value"):
+        for instance in concept.value:
+            if concept.__module__ == "std" and concept.__class__.__name__ == "Service":
+                found_services.append(Resource.get_resource(concept))
+             
+            if hasattr(instance, "_childeren"):
+                found_services.extend(get_child_services(instance))
+                
+    if hasattr(concept, "_childeren"):
+                found_services.extend(get_child_services(concept))                
+ 
+    return set(found_services)
+\end{lstlisting}
+\end{minipage}

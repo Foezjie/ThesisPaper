@@ -1,0 +1,19 @@
+\begin{minipage}
+\begin{lstlisting}[label:listing:drupal_main]
+# define the machine we want to deploy Drupal on
+vm1 = ip::Host(name = "server", os = "fedora-18", ip = "172.16.34.14")
+
+# add a mysql and apache http server
+web_server = httpd::Server(host = vm1)
+mysql_server = mysql::Server(host = vm1)
+
+# define a new virtual host to deploy drupal in
+vhost_name = httpd::VhostName(name = "localhost")
+vhost = httpd::Vhost(webserver = web_server, name = vhost_name, document_root = "/var/www/html/drupal_test")
+
+# deploy drupal in that virtual host
+drupal::Common(host = vm1)
+db = mysql::Database(server = mysql_server, name = "drupal_test", user = "drupal_test", password = "Str0ng-P433w0rd")
+drupal::Site(vhost = vhost, database = db)
+\end{lstlisting}
+\end{minipage}

@@ -4,7 +4,7 @@
   author={Harm De Weirdt},
   promotor={Prof.\,dr.\,ir.\ Wouter Joosen},
   assessor={Ir.\,W. Eetveel\and W. Eetrest},
-  assistant={Ir.\ Bart Vanbrabant}}
+  assistant={Ir.\ Bart Vanbrabant, Dr. \ Dimitri Van Landuyt}}
 % De volgende \setup mag verwijderd worden als geen fiche gewenst is.
 \setup{filingcard,
     translatedtitle={Configuratieafhankelijkheden gebruiken om gedistribueerde applicaties effici\"ent te beheren in een hybride cloud},
@@ -44,12 +44,24 @@
 \usepackage{listings}
 \usepackage{zref-xr}
 \usepackage{enumitem}
+\usepackage{url}
+\usepackage{caption}
+\DeclareCaptionFont{white}{ \color{white} }
+\DeclareCaptionFormat{listing}{
+  \colorbox[cmyk]{0.43, 0.35, 0.35,0.01 }{
+    \parbox{\textwidth}{\hspace{15pt}#1#2#3}
+  }
+}
 
 \lstset{
+    literate={\ \ }{{\ }}1,
     showstringspaces=false,
-    language=python,
     basicstyle=\ttfamily\scriptsize,
-    breaklines=true
+    numberstyle=\tiny\color{codegray},
+    captionpos=b,
+    breaklines=true,
+    numbers=left,
+    frame=single
 }
 
 % Tenslotte wordt hyperref gebruikt voor pdf bestanden.
@@ -71,13 +83,15 @@ Karlijn Ongena voor het vermelden van mijn naam in haar thesis.
 \tableofcontents*
 
 \begin{abstract}
+    \todo{Herschrijven naar opmerkingen}
   Configuratiemanagementsoftware is een vereiste geworden bij het onderhoud van grote gedistribueerde systemen.
-  Ze laat toe een declaratief model op te stellen van de gewenste configuratie, waarna de software zorgt voor het correct uitrollen.
+  Deze software gebruikt een declaratief model van de gewenste configuratie om de nodige resources uit te rollen.
   In dit model staan de verschillende resources die deel uitmaken van de opstelling.
-  Tussen deze resources kunnen afhankelijkheden en vereisten opgesteld worden. 
+  Tussen deze resources kunnen relaties in de vorm van afhankelijkheden en vereisten opgesteld worden. 
   Zo is er bijvoorbeeld de aanwezigheid van een bovenliggende map een vereiste voor het cree\"eren van een bestand,
   of de installatie van een pakket een vereiste voor het opstarten van de bijhorende service.
   Een webserver kan afhankelijk zijn van een databaseserver voor het aanbieden van bepaalde functionaliteit.
+  De huidige configuratiesoftware laat enkel toe vereisten tussen enkelvoudige resources te specificeren.
   Als de vereisten en afhankelijkheden niet gespecificeerd (kunnen) worden in het model moet het uitrolproces vaak meerdere keren gestart worden voordat alle resources correct interageren.
 
   Deze thesis maakt gebruikt van IMP, een nieuwe configuratietool die toelaat zowel afhankelijkheden als vereisten te modelleren.
@@ -96,6 +110,7 @@ Karlijn Ongena voor het vermelden van mijn naam in haar thesis.
 \mainmatter
 
 \include{inleiding}
+\include{imp}
 \include{analyse}
 \include{evaluatie}
 \include{besluit}
@@ -108,7 +123,7 @@ Karlijn Ongena voor het vermelden van mijn naam in haar thesis.
 \backmatter
 % Na de bijlagen plaatst men nog de bibliografie.
 % Je kan de  standaard "abbrv" bibliografiestijl vervangen door een andere.
-\bibliographystyle{abbrv}
+\bibliographystyle{unsrt}
 \bibliography{referenties}
 
 \end{document}

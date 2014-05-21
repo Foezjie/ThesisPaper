@@ -1,5 +1,6 @@
 \zexternaldocument{inleiding}
 \zexternaldocument{analyse}
+\zexternaldocument{imp}
 
 \chapter{Evaluatie}
 \label{sec:evaluatie}
@@ -13,42 +14,139 @@ Deze optimalisatie kost wel extra verwerkingstijd (de uitvoering van de verschil
 
 \section{Simulator}
 \label{sec:simulator}
-Er zijn twee belangrijke voordelen aan het gebruiken van een simulator.
-Ten eerste is de uitroltijd evenredig met de grootte van het model.
-Zelfs met het gebruik van heuristieken om het aantal deployment runs te minimaliseren blijft een significant deel van het proces gespendeerd aan bijvoorbeeld het downloaden van pakketten. 
+Als deel van deze thesis werd een simulator voor IMP ontwikkeld.
+Deze heeft een belangrijk aandeel in het evalueren van de ontwikkelde heuristieken.
+Ze laat namelijk toe op een snelle en eenvoudige manier een uitgebreid model uit te rollen en geeft volledige controle over welke informatie tijdens dat proces beschikbaar wordt gesteld aan de gebruiker.
+De snelheid en eenvoud van de simulator in vergelijking met op fysieke hosts uitrollen is te danken aan twee redenen:
+
+ten eerste is de uitroltijd evenredig met het aantal resources in het model.
+Elke resource moet verwerkt worden, en vooral pakketten duren lang om uit te rollen. 
+Deze moeten niet alleen gedownload worden maar ook ge\"installeerd, beide taken kunnen aardig wat tijd innemen.
+Bij de simulator komt het uitrollen van een pakket overeen met het wegschrijven van een reeks waarden in een database, wat significant sneller is.
+Hierbij moet wel een kanttekening gemaakt worden: bij fysiek uitrollen wordt het uitrollen van het model verdeeld over de verschillende hosts, elk zijn eigen deel van het model.
+De simulator moet alle resources van alle hosts alleen verwerken. 
+Zelfs dan nog is de snelheidswinst bij de simulator significant.
+
 Ten tweede laat een simulator toe modellen met honderden machines uit te rollen op \'e\'en enkele pc.
+Naarmate de modellen groter worden wordt het steeds moeilijker het model op fysieke hosts te testen.
+En het zijn juist de grotere modellen, met meer hosts, die interessant zijn voor de evaluatie van de heuristieken.
 
 De simulator bootst een systeem na dat Fedora 18 draait en gebruik maakt van de yum pakket manager.
 
 \subsection{Uitwerking}
 \label{simulator:uitwerking}
-Het proces begint nog altijd bij IMP zelf.
-Als de gebruiker de optie ``-j'' meegeeft compileert IMP het model volledig maar in plaats van het dan uit te rollen, schrijft hij het weg in een JSON bestand.
-De simulator gebruikt dat bestand als invoer om het uitrolproces te simuleren.
-Het resultaat van een simulatierun is een sqlite-database waarin alle hosts en hun resources vermeld staan (de deployment database genoemd).
-Om de simulatie zo waarheidsgetrouw mogelijk te maken houdt de simulator rekening met volgende aspecten van het uitrolproces:
+De simulator is een Pythonscript dat als invoer een JSON-bestand met daarin het gecompileerde model.
+IMP zelf stelt dit bestand op als de optie ``-j [naam JSON]'' wordt meegegeven.
+Tijdens het uitvoeren van dit script wordt een sqlite-database opgesteld.
+De tabellen van deze database zijn te zien in de tabellen \ref{table:deploymentdatabase}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}[t]{ |l|l| }
+  \hline
+  \multicolumn{2}{|c|}{Agent} \\
+  \hline
+  name & Text \\
+  \hline
+\end{tabular}
+\quad
+\begin{tabular}[t]{ |l|l| }
+  \hline
+  \multicolumn{2}{|c|}{Attribute} \\
+  \hline
+  name & Text \\
+  value & Text \\
+  ResourceId & Text \\
+  \hline
+\end{tabular}
+\quad
+\begin{tabular}[t]{ |l|l| }
+  \hline
+  \multicolumn{2}{|c|}{Resource} \\
+  \hline
+  Id & Text \\
+  \hline
+\end{tabular}
+\caption{De verschillende tabellen die aanwezig zijn in de deploymentdatabase.}
+\label{table:deploymentdatabase}
+\end{table}
+
+In de Attribute tabel staan de attributen opgeslagen als volgt:
+\begin{verbatim}
+name     value       ResourceId                                                                                          
+-------- ---------- ---------------------------------------------------
+group    root        std::File[server,path=/tmp/test],v=1389435342             
+owner    root        std::File[server,path=/tmp/test],v=1389435342             
+path     /tmp/test   std::Directory[server,path=/tmp/test],v=1389435342                        
+\end{verbatim}
+
+Om de simulatie zo waarheidsgetrouw mogelijk te maken houdt de simulator rekening met volgende aspecten van het fysieke uitrolproces:
 
 \begin{itemize}
-  \item Bestanden en mappen kunnen niet aangemaakt worden voordat de bovenliggende map bestaat
-  \item Services kunnen niet gestart worden voordat het bijhorende pakket en bestanden aanwezig zijn
-  \item Resources worden pas aangemaakt als hun afhankelijkheden voldaan zijn
+  \item Bestanden en mappen kunnen niet aangemaakt worden voordat de bovenliggende map bestaat.
+  \item Services kunnen niet gestart worden voordat het bijhorende pakket en bestanden aanwezig zijn.
+  \item Resources worden pas aangemaakt als hun afhankelijkheden voldaan zijn.
 \end{itemize}
 
-De simulator maakt gebruik van twee externe informatiebronnen: een lijst van standaard mappen die aanwezig zijn na een nieuwe Fedora installatie en de repository data van verschillende yum repositories.
-Beide helpen bij het correct uitrollen van de resources.
+Nakijken of alle bijhorende pakketten en bestanden van een service aanwezig zijn wordt gebruikt gemaakt van de repositorydata van de yum pakketmanager.
+De repositorydata bevat twee handige databases: de primary en de filelists.
+De relevante attributen de gebruikte tabellen zijn te vinden in tabel \ref{table:repodata}.
 
-Het uitrollen van een file gaat als volgt:
+\begin{table}[h]
+\centering
+\begin{tabular}[t]{ |l|l| }
+  \hline
+  \multicolumn{2}{|c|}{packages} \\
+  \hline
+  pkgKey & Integer \\
+  name & Text \\
+  \hline
+\end{tabular}
+\quad
+\begin{tabular}[t]{ |l|l| }
+  \hline
+  \multicolumn{2}{|c|}{filelist} \\
+  \hline
+  pkgKey & Integer \\
+  name & Text \\
+  dirname & Text \\
+  filenames & Text \\
+  \hline
+\end{tabular}
+\caption{De relevante attributen van de repositorydatabases die gebruikt worden door de simulator}
+\label{table:repodata}
+\end{table}
+
+De uiteindelijke database die gebruikt wordt door te simulator bestaat uit de samenvoeging van de attributen uit de twee databases.
+Aangezien sommige pakketten een eigen yum repository hebben is voor die gevallen manueel de repositorydata toegevoegd.
+Een voorbeeld van de data die zo bekomen wordt:
+
+\begin{verbatim}
+name          dirname                    filenames                     
+------------  -------------------------  ------------------------------
+oniguruma     /usr/lib                   libonig.so.2.0.0/libonig.so.2 
+oniguruma     /usr/share/doc             oniguruma-5.9.2               
+openCOLLADA   /usr/share/doc             openCOLLADA-0                 
+\end{verbatim}
+
+Bij het installeren van een pakket in de simulator wordt een lijst van alle bestanden en mappen die bij dat pakket horen opgesteld.
+Elk element van deze lijst wordt als entry toegevoegd aan de Attribute tabel, met als value het pad naar dat bestand.
+Als de simulator probeert een bepaalde service uit te rollen zoekt hij alle entries met de servicenaam en stelt een lijst met alle nodige bestanden en mappen op.
+Daarna wordt in de Attribute tabel gecheckt of deze allemaal aanwezig zijn.
+
+Naast de repositorydata wordt ook nog een lijst gebruikt met daarin de bestanden en mappen die standaard aanwezig zijn op een nieuwe Fedora 18 installatie.
+Zonder deze lijst zou elke poging tot het uitrollen van een bestand of map falen, omdat voor geen enkel bestand de bovenliggende map bestaat.
+
+In pseudecode ziet het uitrollen van elke type resource er uit als volgt:
+
 \begin{lstlisting}[showstringspaces=false]
 def deploy_file(file):
   #Check if parent folder exists already
-  if file in std_filesystem or file in deployment_database:
+  if parent(file) in std_filesystem or parent(file) in deployment_database:
     deployment_database.write(file)
   else:
     error('Parent folder doesn't exist!')
-\end{lstlisting}
 
-Het uitrollen van een service gaat als volgt: 
-\begin{lstlisting}
 def deploy_service(srv):
   #Check if required files have been deployed
   requirements = repodata_database.execute('select * from pkgdata where name like srv.name')
@@ -56,16 +154,22 @@ def deploy_service(srv):
     deployment_database.write(srv)
   else:
     error('Not all required resources were deployed!')
-\end{lstlisting}
 
-Het uitrollen van een pakket gaat als volgt: 
-\begin{lstlisting}
 def deploy_package(pkg):
   pkg_files = repodata_database.execute('select * from pkgdata where name like pkg.name') 
   foreach file in pkg_files:
     deployment_database.write(file)
 \end{lstlisting}
-We gaan er van uit dat fouten bij het uitrollen van een pakket de verantwoordelijkheid zijn van de package manager (hier yum), niet de CMS.
+
+Bij het uitrollen van een pakket worden geen controles gedaan. 
+De simulator gaat er van uit dat het correct uitrollen van een pakket de verantwoordelijkheid is van de pakketmanager, niet de CMS.
+
+Om zo goed mogelijk een fysiek uitrolproces te simuleren gebruikt de simulator een gelijkaardig algoritme voor het uitrollen van het model.
+Daarbij worden eerst alle resources weggeschreven die geen vereisten hebben.
+Daarna wordt gekeken of de resources die net zijn uitgerold een vereiste waren van de overblijvende resources.
+Als dit het geval is worden de geschreven resources verwijderd uit de lijst met vereisten.
+Zo komen (hopelijk) nieuwe resources vrij die geen vereisten meer hebben en die kunnen in de volgende herhaling uitgerold worden.
+Dit proces herhaalt zich tot er geen resources meer moeten uitgerold worden.
 
 \todo{Verschil in uitroltijd simulator/IMP?}
 \todo{Besluit sectie}
@@ -74,13 +178,13 @@ We gaan er van uit dat fouten bij het uitrollen van een pakket de verantwoordeli
 \label{sec:bestanden_en_mappen_eval}
 Aangezien een bestand niet kan gecre\"eerd worden zonder zijn bovenliggende map voegt deze heuristiek automatisch de afhankelijkheid tussen beide toe aan het model.
 
-Aangezien mappen altijd kunnen gecre\"eerd worden zijn er maximaal twee deployment runs nodig als er geen heuristiek gebruikt wordt.
+Aangezien mappen altijd kunnen gecre\"eerd worden zijn er maximaal twee deployment runs nodig als er geen heuristiek gebruikt wordt.\footnote{Twee runs als maar \'e\'en bovenliggende map moet aangemaakt worden. Per bijkomend niveau is mogelijks een extra run nodig.}
 Bij gebruik van de heuristiek moet er exact \'e\'en uitgerold worden.
 De verwachting is dat het uitrollen met gebruik van de heuristiek dan ook ongeveer half zo lang duurt.
 
 Figuur \ref{fig:file_dir_times} toont de resultaten van deze test.
 Elk datapunt is het gemiddelde van 30 runs, uitgevoerd op een virtuele machine met twee cores van 2Ghz en 2GB RAM ter beschikking.
-Het model bestaat iedere keer uit vast aantal bestanden en mappen, \'e\'en bestand per map.
+Het model bestaat iedere keer uit een vast aantal bestanden en mappen, \'e\'en bestand per map.
 \begin{figure}[h]
     \begin{center}
     \includegraphics[width=0.8\textwidth]{images/file_dir_times.pdf}
@@ -107,13 +211,13 @@ De testresultaten zijn te vinden in tabel \ref{table:service_package_dep}.
 
 \begin{table}
   \begin{center}
-  \label{table:service_package_dep}
   \begin{tabular}{ r | c | c }
             & tijd(s)   & gemiddeld aantal runs nodig \\ \hline
     zonder  & 3.21      & 2.0 \\ \hline
     met     & 2.21      & 1 \\
   \end{tabular}
   \caption{Meetresultaten}
+  \label{table:service_package_dep}
   \end{center}
 \end{table}
 %specifieke resultaten:
@@ -126,13 +230,36 @@ De testresultaten zijn te vinden in tabel \ref{table:service_package_dep}.
 De resultaten van de test zijn zoals verwacht: dankzij de heuristiek is maar \'e\'en deployment run nodig.
 
 \section{Relaties en afhankelijkheden tussen hoog-niveau concepten}
-Door het omzetten van relaties naar afhankelijkheden kan het nodige aantal deployment runs gereduceerd worden.
+De heuristieken uit sectie \ref{sec:relaties} en \ref{sec:vereisten_uit_afhankelijkheden} werken best samen.
+De eerste vormt relaties met een bepaalde multipliciteit om naar afhankelijke relaties.
+De tweede zet afhankelijke relaties tussen entiteiten die services bevatten om naar vereisten tussen die services.
+Zo wordt vermeden dat een extra deployment run nodig is de services correct op te starten.
+
+Deze heuristieken werden niet apart getest, enkel in de use cases.
+In individuele testen zouden de resultaten gelijkaardig zijn aan die van de bestanden en mappen heuristiek.
 
 \section{Use cases}
 
 \subsection{Document processing}
+Deze eerste use case studie betreft een uitgebreide en complexe infrastructuur gebruikt voor de geautomatiseerde verwerking van documenten.
+De infrastructuur ondersteunt \todo{cite} de creatie, het opstellen van de layout, de processing en het opslaan van bedrijfsdocumenten (bvb facturen, orders, aandelen,\ldots).
+Ze wordt meestal uitgerold als een cloudservice.
+Figuur \ref{fig:doc_processing} toont de verschillende onderdelen van deze opstelling:
+de gebruiker kan via verschillende inputkanalen data doorspelen aan de productieservice.
+Die verwerkt de gegevens in verschillende stappen.
+De worker nodes zijn verantwoordelijk voor de verwerking van die acties.
+De resultaten worden geplaatst in een database en kunnen via verschillende outputkanalen opgevraagd worden.
 
-\todo{Uitleg geven over use case}
+\begin{figure}[h]
+    \begin{center}
+    \includegraphics[width=0.8\textwidth]{images/doc_processing.pdf}
+    \caption{Overzicht van de document processing infrastructuur}
+    \label{fig:doc_processing}
+    \end{center}
+\end{figure}
+
+Het volledige model in IMP van deze use case bestaat uit 35 bibliotheken \todo{bibliotheken vermelden, mogelijks een hoofdstuk introductie tot IMP?} waaronder Apache, HBase, Cassandra, \ldots
+In totaal zijn er reeds 82 relaties gespecifi\"eerd, maar het model is nog niet volledig.
 
 \todo{Dit is eigenlijk geen uitleg van de toepassing van de heuristieken op de use case, meer een uitleg/test van de heuristieken}
 In afbeelding \ref{fig:reqs_doc} is te zien hoeveel vereisten elke heuristiek toevoegen.
@@ -167,8 +294,8 @@ In afbeelding \ref{fig:time_runs_doc} is te zien welke impact de toegevoegde ver
 De resultaten bevestigen onze aanname dat het toevoegen van vereisten kan leiden tot een daling in het aantal deployment runs.
 Elke combinatie van de drie heuristieken leidt zelfs tot een ``one-shot'' uitrolproces waarin in \'e\'en keer het volledige model correct uitgerold wordt.
 
+Het volledige model bevat 82 relaties. 
 \subsection{MongoDB}
-
 MongoDB is een van de meer bekende NoSQL databases.
 Een volledige configuratie bestaat uit verschillende services die elkaar ondersteunen.
 Figuur \ref{fig:mongodb_architecture} geeft een schematische voorstelling van een dergelijke set-up. \todo{cite}
@@ -194,6 +321,16 @@ In het model dat Thomas Uyttendaele opgesteld heeft \todo{cite} krijgen de onder
 \end{table}
 
 De onderdelen zullen pas correct kunnen samenwerken als ze in de juiste volgorde worden opgestart.
+Figuur \ref{fig:mongo_imp} toont de implementatie van MongoDB in IMP, samen met de volgorde waarin de services gestart moeten worden.
+
+\begin{figure}[h]
+    \begin{center}
+    \includegraphics[width=0.8\textwidth]{images/mongo_imp.pdf}
+    \caption{Implementatie van MongoDB in IMP, met de correcte opstartvolgorde aangeduid}
+    \label{fig:mongo_imp}
+    \end{center}
+\end{figure}
+
 Het is dus weerom \todo{Vroeger vermelden dat het van groot belang is dat het model compleet is} van groot belang dat alle afhankelijkheden in het model
 vermeld worden.
 
@@ -219,3 +356,6 @@ per run gedeployed worden.
     \label{fig:time_runs_mongo}
     \end{center}
 \end{figure}
+
+De library voor MongoDB bestaat uit 185 regels code\footnote{Blanco lijnen en commentaar niet meegerekend}, waarvan er 24 relaties beschrijven.
+Alle libraries samen bevatten 50 relaties. 

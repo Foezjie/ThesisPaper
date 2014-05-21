@@ -1,20 +1,30 @@
 \zexternaldocument{evaluatie}
 \zexternaldocument{inleiding}
+\zexternaldocument{imp}
 
 \chapter{Naar het automatisch toevoegen van vereisten en afhankelijkheden}
 \label{sec:afhankelijkheden}
-Configuratiebeheergereedschappen die gebruik maken van vereisten en afhankelijkheden reduceren daarmee het aantal deployment runs dat nodig is om een stabiele toestand te bereiken.
-Dit hoofdstuk introduceert enkele heuristieken die ,naast degene die de gebruiker specificeert, extra vereisten en afhankelijkheden probeert toe te voegen.
+Configuratiebeheergereedschappen die gebruik maken van vereisten en afhankelijkheden reduceren het aantal fouten tijdens het uitrolproces en zorgen voor een snellere convergentie naar de gewenste toestand.
+Dit hoofdstuk introduceert enkele heuristieken die proberen extra vereisten en afhankelijkheden toe te voegen aan het configuratiemodel.
 
-Secties \ref{sec:bestanden_en_mappen}, \ref{sec:stacks} en \ref{sec:namen} introduceren heuristieken die extra vereisten toevoegen aan het model en zo het aantal fouten reduceren.
-
-De heuristieken uit secties \ref{sec:relaties} en \ref{sec:vereisten_uit_afhankelijkheden} werken samen om afhankelijkheden om te zetten in vereisten om zo een effici\"entere volgorde opleggen aan het uitrolproces.  
+De heuristieken zijn deels ge\"inspireerd door situaties die in de inleiding al voorgesteld werden. 
+Secties \ref{sec:bestanden_en_mappen} beschrijft een heuristiek die garandeert dat bestanden en mappen altijd in juiste volgorde gecre\"eerd worden.
+Sectie \ref{sec:stacks} en \ref{sec:namen} introduceren heuristieken die vereisten toevoegen tussen logisch samenhorende resources.
+De heuristieken uit secties \ref{sec:relaties} en \ref{sec:vereisten_uit_afhankelijkheden} werken samen om relaties om te zetten in vereisten om zo een effici\"entere volgorde opleggen aan het uitrolproces.  
 
 \section{Vereisten tussen bestanden en mappen}
 \label{sec:bestanden_en_mappen}
-Deze heuristiek zorgt dat elk bestand zijn bovenliggende map vereist.
-Een bestand moet namelijk deel uitmaken van een map.
+Deze heuristiek garandeert dat elk bestand pas aangemaakt wordt na zijn bovenliggende map.
+Als namelijk een omgekeerde volgorde gehanteerd wordt mislukt het uitrollen van het bestand.
 Figuur \ref{fig:file_dir_dep} geeft hiervan een visuele voorstelling.
+
+\begin{figure}
+    \begin{center}
+    \includegraphics[width=0.6\textwidth]{images/file_dir_dep.pdf}
+    \caption{Grafische voorstelling van de afhankelijkheid tussen een bestand en zijn bovenliggende folder}
+    \label{fig:file_dir_dep}
+    \end{center}
+\end{figure}
 
 Het algoritme dat hiervoor gebruikt wordt ziet eruit als volgt (pseudocode):
 \begin{minipage}{\textwidth}
@@ -26,7 +36,11 @@ for file in host.resources:
 \end{lstlisting}
 \end{minipage}
 
-Als de map niet vermeld wordt in het model wordt deze ook niet toegevoegd omdat dit ongewenste gevolgen kan hebben. \todo{Welke?}
+Als de map niet vermeld wordt in het model wordt deze ook niet toegevoegd omdat dit ongewenste gevolgen kan hebben.
+Dit zou namelijk fouten verbergen die de gebruiker kan maken bij het opstellen van het model.
+Als hij bijvoorbeeld een bestand plaatst in de configuratiemap van een pakket (bvb ``/etc/ldap'') maar het pakket zelf (``ldap'') vergeet toe te voegen aan het model krijgt hij geen foutmelding.
+De map wordt namelijk automatisch aangemaakt.
+
 
 \section{Vereisten tussen services, packages en configuratiebestanden}
 \label{sec:stacks}
@@ -62,11 +76,11 @@ for file in host.resources:
 \end{lstlisting}
 \end{minipage}
 
-Deze heuristiek resulteert in een soort batchuitvoering waarbij de CMS  eerst alle pakketten installeert, dan alle (configuratie)bestanden en uiteindelijk alle services.
+Deze heuristiek resulteert in een soort batchuitvoering waarbij de CMS  eerst alle pakketten installeert, dan alle (configuratie)bestanden aanmaakt en uiteindelijk alle services opstart.
 
 De volgende aanpak gebruikt meer info uit het model en resulteert in minder overbodige afhankelijkheden.
-In de modelcode worden bestanden, packages en services die bij elkaar horen meestal binnen eenzelfde implementatie gespecifi\"eerd.
-Een voorbeeld is de implementatie van een MySQL server:
+In het model worden bestanden, pakketten en services die deel uitmaken van een geheel gegroepeerd in een ``implementatie''.
+Een voorbeeld is de MySQL server:
 
 \begin{minipage}{\textwidth}
 \begin{lstlisting}
@@ -82,8 +96,8 @@ end
 \end{lstlisting}
 \end{minipage}
 
-Bij het verwerken van het model tijdens het uitrolproces zijn de resources van deze stack binnen \'e\'enzelfde scope gedefini\"eerd.
-De heuristiek zoekt verzamelingen van packages en services die binnen \'e\'enzelfde scope gedefini\"eerd zijn en stelt de correcte afhankelijkheden op tussen enkel die groep resources.
+Alles dat staat tussen ``implementation mysql'' en ``end'' is gedefini\"eerd binnen \'e\'enzelfde scope.
+Deze heuristiek zoekt verzamelingen van packages en services die binnen \'e\'enzelfde scope gedefini\"eerd zijn en stelt de correcte afhankelijkheden op tussen enkel die groep resources.
 De aanwezigheid van files is optioneel: sommige services hebben geen aangepast configuratiebestand nodig.
 
 \begin{minipage}{\textwidth}
@@ -106,19 +120,21 @@ for stack in srv_stacks:
 \end{lstlisting}
 \end{minipage}
 
-Deze heuristiek voegt geen overbodige vereisten toe, op voorwaarde dat degene die het model opstelt de verschillende stacks opsplitst in verschillende implementaties.
+Deze heuristiek voegt geen overbodige vereisten toe.
 Resultaten van het gebruik van deze heuristiek staan in sectie \ref{sec:stacks_eval}.
 
 \section{Vereisten tussen resources met gelijkaardige naam}
 \label{sec:namen}
-De laatste heuristiek heeft een gelijkaardige doel als de vorige: vereisten opstellen tussen de onderdelen van een stack.
+De laatste heuristiek heeft een gelijkaardige doel als de vorige: vereisten opstellen tussen samenhorende resources.
 In plaats van te werken binnen een scope zoekt deze heuristiek naar resources met een gelijkaardige naam.
 
-In het geval van de vereisten tussen bestanden en pakketten negeert de heuristiek de cijfers op het einde van de naam van een pakket en als er een splitsingsteken staat in de naam houdt het enkel rekening met het eerste deel.
+Om de vereisten tussen services en de bijhorende pakketten en bestanden op te stellen wordt de naam van de service gebruikt.
+
+Om de vereisten tussen pakketten en de configuratiebestanden op te stellen worden twee aanpassingen gedaan aan de naam van het pakket.
+Allereerst worden alle cijfers uit de naam van het pakket verwijderd.
+Daarna wordt alles na een splitsingsteken verwijderd.
 Zo stelt de heuristiek ook afhankelijkheden op tussen bijvoorbeeld het pakket ``cassandra12'' en het configuratiebestand ``/etc/cassandra.conf'' of het pakket ``openssh-server'' en ``/etc/openssh.conf''. 
-
-Namen gebruiken levert meer vereisten op dan het gebruik van scopes.\todo{Uitleggen waarom}
-
+\todo{waarom niet gewoon naam van service gebruiken? Truukjes zijn dan niet nodig.}
 \begin{minipage}{\textwidth}
 \begin{lstlisting}
 for service in host.resources:
@@ -151,10 +167,10 @@ Een ander voorbeeld is
 \begin{lstlisting}
 Host host [1] -- [0:] File files
 \end{lstlisting}
-Dit betekent dat op een Host nul of meerdere files kunnen staan, maar dat elke File \'e\'en Host moet hebben.
-Deze heuristiek leidt hieruit af dat een File niet kan bestaan zonder een host en het dus nodig is dat eerst de Host uitgerold wordt voordat geprobeerd wordt de File te cree\"eren.
+Dit betekent dat een Host nul of meerdere files kan bevatten\todo{ander woord zoeken}, maar dat elke File op maximaal \'e\'en Host kan uitgerold worden.
+De heuristiek leidt hieruit af dat een File niet kan bestaan zonder een host en het dus nodig is dat eerst de Host wordt uitgerold voordat de File wordt aaangemaakt.
 
-Algemeen kan men dus besluiten dat elke relatie waar de ene kant een multipliciteit van [0] of [0:] heeft en de andere kant multipliciteit [n] of [n:] de eerste entiteit afhankelijk is van de tweede.
+Algemeen kan men besluiten dat elke relatie waar de ene kant een multipliciteit van [0] of [0:] heeft en de andere kant multipliciteit [n] of [n:] de eerste entiteit afhankelijk is van de tweede.
 De code voor deze heuristiek ziet er uit als volgt:
 
 \begin{minipage}{\textwidth}
@@ -167,22 +183,20 @@ for lib in model.get_scopes():
 \end{lstlisting}
 \end{minipage}
 
-Als enkel deze heuristiek gebruikt wordt zal IMP niets veranderen aan het uitrolproces: IMP houdt momenteel nog geen rekening met afhankelijkheden.
+Als enkel deze heuristiek gebruikt wordt zal IMP niets veranderen aan het uitrolproces.
+IMP doet zelf niets met de gedefini\"eerde relaties.
 De extra informatie kan wel gebruikt worden door andere heuristieken.
-Een voorbeeld hiervan is deze hieronder (sectie \ref{sec:vereisten_uit_afhankelijkheden}) die toelaat afhankelijkheden zoals deze tussen een webserver en databaseserver te gebruiken voor een optimaler uitrolproces.
+Een voorbeeld hiervan is deze hieronder (sectie \ref{sec:vereisten_uit_afhankelijkheden}) die afhankelijke relaties omzet in vereisten.
 
-\section{Vereisten vanuit afhankelijkheden}
+\section{Vereisten door afhankelijkheden}
 \label{sec:vereisten_uit_afhankelijkheden}
-IMP laat niet alleen toe om afhankelijkheden tussen enkelvoudige concepten zoals bestanden, services,\ldots te specifi\"eren maar ook tussen samengestelde concepten zoals webservers, databaseservers,\ldots
-Deze betekenen dat de ene kant niet zijn volledige functionaliteit kan aanbieden zonder de aanwezigheid van de andere kant.
-Aangezien een server zijn functionaliteit aanbiedt aan de hand van een service en niet zijn configuratiebestanden en pakketten stelt deze heuristiek enkel afhankelijkheden op tussen de services.
+Deze heuristiek heeft als doel afhankelijke relaties om te zetten in een concrete vereiste tussen resources.
+Samengestelde entiteiten zoals een webserver bestaan uit verschillende resources: configuratiebestanden, pakketten en services.
+Als een entiteit afhankelijk is van een andere betekent dat dat hij zijn volledige functionaliteit niet kan aanbieden als de andere entiteit nog niet volledig uitgerold is.
+Het aanbieden van functionaliteit gebeurt door services, niet door de aanwezigheid van bestanden of pakketten.
+Een afhankelijkheid tussen twee entiteiten kan dus gereduceert worden tot een vereiste tussen de services van de twee entiteiten.
 
-IMP laat toe om verschillende libraries te gebruiken (en zelf te defini\"eren) met daarin voorgedefinieerde concepten. 
-Het algoritme begint met het doorzoeken van deze libraries naar concepten die services bevatten.
-Dan kijkt het of dat concept afhankelijk is van een ander concept.
-Als dit het geval is wordt gekeken of dat ander concept ook services bevat.
-Zo ja stelt de heuristiek vereisten op tussen de services. 
-
+Deze heuristiek zoekt naar afhankelijke relaties en voegt de gepaste vereisten toe tussen de services die in relatie staan met elkaar.
 In pseudocode ziet dit er uit als volgt:
 
 \begin{minipage}{\textwidth}

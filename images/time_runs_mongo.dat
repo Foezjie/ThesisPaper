@@ -1,0 +1,16 @@
+#name run1 run2 run3 run4 number_of_runs
+name 446 60 1 0 3
+name_rel 446 61 0 0 2
+name_rel_stack 507 0 0 0 1
+name_stack 486 19 2 0 3
+name_stack_rel 507 0 0 0 1
+rel 294 181 32 0 3 
+rel_name 446 61 0 0 2 
+rel_name_stack 507 0 0 0 1
+rel_stack 384 123 0 0 2
+rel_stack_name 507 0 0 0 1 
+stack 390 115 2 0 3 
+stack_name 489 16 2 0 3
+stack_name_rel 507 0 0 0 1
+stack_rel 419 88 0 0 2
+stack_rel_name  507 0 0 0 1

@@ -21,5 +21,6 @@ def avg_deployment(deployments):
         avg_list.append(avg([depl[index] for depl in avg_deployments]))
     return avg_list
 
-t = [[1214, 192, 1], [1213, 193, 1], [1184, 222, 1], [1190, 217], [1208, 199], [1197, 207, 3], [1232, 174, 1], [1177, 229, 1], [1182, 223, 2], [1184, 222, 1]]
-print(avg_deployment(t))
+t = [[446, 61]]
+
+print("%s %s" % (' '.join(map(str,avg_deployment(t))), len(avg_deployment(t))))
